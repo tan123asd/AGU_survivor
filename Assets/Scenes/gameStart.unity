@@ -175,7 +175,6 @@ GameObject:
   - component: {fileID: 404690846}
   - component: {fileID: 404690845}
   - component: {fileID: 404690847}
-  - component: {fileID: 404690848}
   - component: {fileID: 404690849}
   m_Layer: 0
   m_Name: Player
@@ -281,19 +280,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &404690848
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 404690844}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9c72b7cbbe3dc7d4a84d43a2bb10d86e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement2D
-  moveSpeed: 5
 --- !u!50 &404690849
 Rigidbody2D:
   serializedVersion: 5
