@@ -10,18 +10,22 @@ public class SpawnEnemy : MonoBehaviour
     void Start()
     {
         SpawnWave(waveNumber);
+        StartCoroutine(SpawnWaves());
     }
 
     // Update is called once per frame
     void Update()
     {
-        StartCoroutine(SpawnWaves());
+
     }
 
     IEnumerator SpawnWaves()
     {
-        yield return new WaitForSeconds(5f);
-        SpawnWave(waveNumber);
+        while (true)
+        {
+            yield return new WaitForSeconds(5f);
+            SpawnWave(waveNumber);
+        }
     }
     private void SpawnWave(int waveNumber)
     {
