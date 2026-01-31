@@ -50,8 +50,9 @@ public class Projectile : MonoBehaviour
         damage = dmg;
         
         // Xoay mũi vũ khí theo hướng bay
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.Euler(0, 90, angle);
+        // -90 vì sprite mũi nhọn đang hướng lên (↑) thay vì phải (→)
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
+        transform.rotation = Quaternion.Euler(0, 0, angle);
     }
     
     private void OnTriggerEnter2D(Collider2D other)
