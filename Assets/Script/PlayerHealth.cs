@@ -12,6 +12,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     [Header("References")]
     [SerializeField] private HealthBar healthBar;
 
+
     public int MaxHealth => maxHealth;
     public int CurrentHealth => currentHealth;
     public bool IsDead => currentHealth <= 0;
@@ -45,15 +46,11 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     {
         currentHealth = 0;
         if (healthBar != null)
-            healthBar.SetHealth(0);
+            healthBar.SetHealth(0);       
 
-        // Vô hiệu hóa điều khiển, có thể gọi event hoặc reload scene
-        var movement = GetComponent<PlayerMovement2D>();
-        if (movement != null)
-            movement.enabled = false;
-
-        // TODO: trigger death animation, game over UI, respawn...
-        Debug.Log("Player died.");
+        // Destroy player ngay khi chết
+        GameObject.FindObjectOfType<Player>().enabled = false;
+        // TODO: load scene end game (làm sau) — có thể gọi trước Destroy với delay, hoặc dùng SceneManager.LoadScene trong callback
     }
 
     /// <summary>

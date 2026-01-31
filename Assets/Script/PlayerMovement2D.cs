@@ -14,10 +14,10 @@ public class PlayerMovement2D : MonoBehaviour
     
     private void Awake()
     {
-        // Lấy các component cần thiết
-        rb = GetComponent<Rigidbody2D>();
-        animator = GetComponent<Animator>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        // Lấy component trên chính object này hoặc trên parent (không dùng transform.parent để tránh null khi parent chưa có)
+        rb = GetComponentInParent<Rigidbody2D>();
+        animator = GetComponentInParent<Animator>();
+        spriteRenderer = GetComponentInParent<SpriteRenderer>();
     }
     
     private void Update()
@@ -49,29 +49,23 @@ public class PlayerMovement2D : MonoBehaviour
     
     private void Move()
     {
-        // Di chuyển nhân vật theo input
+        if (rb == null) return;
         rb.linearVelocity = moveInput * moveSpeed;
     }
     
     private void UpdateAnimation()
     {
-        // Kiểm tra xem nhân vật có đang di chuyển không
+        if (animator == null) return;
         bool isMoving = moveInput.magnitude > 0.1f;
-        
-        // Set parameter "isRuning" trong Animator
         animator.SetBool("isRuning", isMoving);
     }
     
     private void FlipSprite()
     {
-        // Lật sprite sang trái hoặc phải dựa vào hướng di chuyển
+        if (spriteRenderer == null) return;
         if (moveInput.x > 0)
-        {
-            spriteRenderer.flipX = false; // Nhìn sang phải
-        }
+            spriteRenderer.flipX = false;
         else if (moveInput.x < 0)
-        {
-            spriteRenderer.flipX = true; // Nhìn sang trái
-        }
+            spriteRenderer.flipX = true;
     }
 }
