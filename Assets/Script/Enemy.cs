@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Enemy : MonoBehaviour
+public class Enemy : MonoBehaviour, IDamageable
 {
     public int speed = 2;
     private GameObject player;
@@ -20,7 +20,7 @@ public class Enemy : MonoBehaviour
     void Update()
     {
         ChasePlayer();
-        
+
     }
 
     void LateUpdate()
@@ -31,7 +31,7 @@ public class Enemy : MonoBehaviour
     private void ChasePlayer()
     {
         Vector2 direction = (player.transform.position - transform.position).normalized;
-        if(direction.x < 0)
+        if (direction.x < 0)
         {
             transform.localScale = new Vector3(-1, 1, 1);
         }
@@ -41,8 +41,7 @@ public class Enemy : MonoBehaviour
         }
         if (health <= 0)
         {
-            enemyAnim.SetBool("Dead", true);
-            Destroy(gameObject, 1.0f);
+            Die();
         }
         else
         {
@@ -50,23 +49,37 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    public void TakeDamage(int damage)
+    {
+        // Implementation of TakeDamage method
+        lastDamageTime = Time.time;
+        health-=damage;
+        isHit = true;
+        enemyAnim.SetTrigger("Hit");
+        Debug.Log("Enemy Health: " + health);
+    }
+
+    public void Die()
+    {
+        enemyAnim.SetBool("Dead", true);
+        Destroy(gameObject, 1.0f);
+    }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if(collision.CompareTag("Player") && !isHit)
+        if (collision.CompareTag("Player") && !isHit)
         {
-            if(Time.time - lastDamageTime < damageCooldown)
+            if (Time.time - lastDamageTime < damageCooldown)
             {
                 return;
             }
             else
             {
-                lastDamageTime = Time.time;
-                health--;
-                isHit = true;
-                enemyAnim.SetTrigger("Hit");
-                Debug.Log("Enemy Health: " + health);
+                TakeDamage(1);
             }
-             
+
         }
     }
+
+    
 }
