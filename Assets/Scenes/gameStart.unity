@@ -1356,6 +1356,10 @@ MonoBehaviour:
   maxHealth: 100
   currentHealth: 0
   healthBar: {fileID: 11176628}
+<<<<<<< Updated upstream
+=======
+  damageFromEnemy: 10
+>>>>>>> Stashed changes
 --- !u!4 &723519926
 Transform:
   m_ObjectHideFlags: 0
