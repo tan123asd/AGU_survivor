@@ -9,6 +9,7 @@ public class PlayerMovement2D : MonoBehaviour
     private Rigidbody2D rb;
     private Animator animator;
     private SpriteRenderer spriteRenderer;
+    private PlayerHealth playerHealth;
     
     private Vector2 moveInput;
     
@@ -18,10 +19,24 @@ public class PlayerMovement2D : MonoBehaviour
         rb = GetComponentInParent<Rigidbody2D>();
         animator = GetComponentInParent<Animator>();
         spriteRenderer = GetComponentInParent<SpriteRenderer>();
+        
+        // Tìm PlayerHealth: trên chính object này, parent, hoặc sibling (anh em cùng parent)
+        playerHealth = GetComponent<PlayerHealth>();
+        if (playerHealth == null)
+            playerHealth = GetComponentInParent<PlayerHealth>();
+        if (playerHealth == null && transform.parent != null)
+            playerHealth = transform.parent.GetComponentInChildren<PlayerHealth>();
+        
+        if (playerHealth == null)
+            Debug.LogWarning("PlayerHealth not found! Movement won't stop when dead.");
     }
     
     private void Update()
     {
+        // Không cho di chuyển khi đã chết
+        if (playerHealth != null && playerHealth.IsDead)
+            return;
+        
         // Đọc input từ bàn phím
         GetInput();
         
@@ -34,6 +49,14 @@ public class PlayerMovement2D : MonoBehaviour
     
     private void FixedUpdate()
     {
+        // Dừng hẳn khi đã chết
+        if (playerHealth != null && playerHealth.IsDead)
+        {
+            if (rb != null)
+                rb.linearVelocity = Vector2.zero;
+            return;
+        }
+        
         // Di chuyển nhân vật
         Move();
     }

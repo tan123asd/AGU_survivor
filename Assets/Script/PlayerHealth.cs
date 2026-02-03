@@ -11,7 +11,11 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
     [Header("References")]
     [SerializeField] private HealthBar healthBar;
-
+    [SerializeField] private int damageFromEnemy = 10; // Damage nhận từ enemy
+    
+    private Animator animator;
+    private float lastDamageTime = -999f;
+    private float damageCooldown = 1.0f; // Cooldown giữa các lần nhận damage
 
     public int MaxHealth => maxHealth;
     public int CurrentHealth => currentHealth;
@@ -21,6 +25,18 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     {
         if (currentHealth <= 0)
             currentHealth = maxHealth;
+        
+        // Tìm Animator trên GameObject này, GameObject cha hoặc GameObject con
+        animator = GetComponent<Animator>();
+        if (animator == null)
+            animator = GetComponentInParent<Animator>(); // Tìm ở parent (Player)
+        if (animator == null)
+            animator = GetComponentInChildren<Animator>(); // Tìm ở children
+        
+        if (animator != null)
+            Debug.Log("Found Animator successfully!");
+        else
+            Debug.LogError("ANIMATOR NOT FOUND! Player GameObject cần có Animator component!");
     }
 
     private void Start()
@@ -44,13 +60,36 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
     public void Die()
     {
+        Debug.Log("=== DIE() CALLED ===");
+        
         currentHealth = 0;
         if (healthBar != null)
-            healthBar.SetHealth(0);       
+            healthBar.SetHealth(0);
 
-        // Destroy player ngay khi chết
-        GameObject.FindObjectOfType<Player>().enabled = false;
-        // TODO: load scene end game (làm sau) — có thể gọi trước Destroy với delay, hoặc dùng SceneManager.LoadScene trong callback
+        // Trigger animation chết giống Enemy
+        if (animator != null)
+        {
+            Debug.Log("Triggering Die animation...");
+            animator.SetTrigger("Die");
+            Debug.Log("Die trigger set successfully!");
+        }
+        else
+        {
+            Debug.LogError("Cannot trigger Die animation - Animator is NULL!");
+        }
+
+        // Disable movement
+        PlayerMovement2D movement = GetComponent<PlayerMovement2D>();
+        if (movement != null)
+            movement.enabled = false;
+
+        // Disable collider để không va chạm nữa
+        Collider2D col = GetComponent<Collider2D>();
+        if (col != null)
+            col.enabled = false;
+
+        // TODO: load scene end game sau 2 giây (làm sau)
+        // Invoke("LoadGameOverScene", 2f);
     }
 
     /// <summary>
@@ -62,5 +101,22 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
         if (healthBar != null)
             healthBar.SetHealth(currentHealth);
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        // Khi chạm vào Enemy
+        if (collision.CompareTag("Enemy"))
+        {
+            // Kiểm tra cooldown
+            if (Time.time - lastDamageTime < damageCooldown)
+                return;
+            
+            lastDamageTime = Time.time;
+            
+            // Nhận damage
+            TakeDamage(damageFromEnemy);
+            Debug.Log("Player took damage from Enemy!");
+        }
     }
 }

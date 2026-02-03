@@ -67,17 +67,31 @@ public class Enemy : MonoBehaviour, IDamageable
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player") && !isHit)
+        if (collision.CompareTag("Player"))
         {
             if (Time.time - lastDamageTime < damageCooldown)
             {
                 return;
             }
-            else
+            
+            lastDamageTime = Time.time;
+            
+            // Tìm IDamageable trên GameObject Player hoặc các con của nó
+            IDamageable playerDamageable = collision.GetComponent<IDamageable>();
+            if (playerDamageable == null)
+                playerDamageable = collision.GetComponentInChildren<IDamageable>();
+            
+            if (playerDamageable != null)
+            {
+                playerDamageable.TakeDamage(10); // Player mất 10 máu
+                Debug.Log("Enemy damaged Player!");
+            }
+            
+            // Enemy cũng nhận damage
+            if (!isHit)
             {
                 TakeDamage(1);
             }
-
         }
     }
 
