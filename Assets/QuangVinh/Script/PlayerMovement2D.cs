@@ -9,19 +9,34 @@ public class PlayerMovement2D : MonoBehaviour
     private Rigidbody2D rb;
     private Animator animator;
     private SpriteRenderer spriteRenderer;
+    private PlayerHealth playerHealth;
     
     private Vector2 moveInput;
     
     private void Awake()
     {
-        // Lấy các component cần thiết
-        rb = GetComponent<Rigidbody2D>();
-        animator = GetComponent<Animator>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        // Lấy component trên chính object này hoặc trên parent (không dùng transform.parent để tránh null khi parent chưa có)
+        rb = GetComponentInParent<Rigidbody2D>();
+        animator = GetComponentInParent<Animator>();
+        spriteRenderer = GetComponentInParent<SpriteRenderer>();
+        
+        // Tìm PlayerHealth: trên chính object này, parent, hoặc sibling (anh em cùng parent)
+        playerHealth = GetComponent<PlayerHealth>();
+        if (playerHealth == null)
+            playerHealth = GetComponentInParent<PlayerHealth>();
+        if (playerHealth == null && transform.parent != null)
+            playerHealth = transform.parent.GetComponentInChildren<PlayerHealth>();
+        
+        if (playerHealth == null)
+            Debug.LogWarning("PlayerHealth not found! Movement won't stop when dead.");
     }
     
     private void Update()
     {
+        // Không cho di chuyển khi đã chết
+        if (playerHealth != null && playerHealth.IsDead)
+            return;
+        
         // Đọc input từ bàn phím
         GetInput();
         
@@ -34,6 +49,14 @@ public class PlayerMovement2D : MonoBehaviour
     
     private void FixedUpdate()
     {
+        // Dừng hẳn khi đã chết
+        if (playerHealth != null && playerHealth.IsDead)
+        {
+            if (rb != null)
+                rb.linearVelocity = Vector2.zero;
+            return;
+        }
+        
         // Di chuyển nhân vật
         Move();
     }
@@ -49,29 +72,23 @@ public class PlayerMovement2D : MonoBehaviour
     
     private void Move()
     {
-        // Di chuyển nhân vật theo input
+        if (rb == null) return;
         rb.linearVelocity = moveInput * moveSpeed;
     }
     
     private void UpdateAnimation()
     {
-        // Kiểm tra xem nhân vật có đang di chuyển không
+        if (animator == null) return;
         bool isMoving = moveInput.magnitude > 0.1f;
-        
-        // Set parameter "isRuning" trong Animator
         animator.SetBool("isRuning", isMoving);
     }
     
     private void FlipSprite()
     {
-        // Lật sprite sang trái hoặc phải dựa vào hướng di chuyển
+        if (spriteRenderer == null) return;
         if (moveInput.x > 0)
-        {
-            spriteRenderer.flipX = false; // Nhìn sang phải
-        }
+            spriteRenderer.flipX = false;
         else if (moveInput.x < 0)
-        {
-            spriteRenderer.flipX = true; // Nhìn sang trái
-        }
+            spriteRenderer.flipX = true;
     }
 }
