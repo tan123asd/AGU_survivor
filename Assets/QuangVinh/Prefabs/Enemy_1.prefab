@@ -130,6 +130,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
   speed: 2
   health: 3
+  expSpawn:
+  - {fileID: 814415956633222386, guid: 82baf2eaaccb78a4690c211bd03a4a4a, type: 3}
+  - {fileID: 6329787050726359824, guid: a9c99d349841901469736a1a173c96d0, type: 3}
 --- !u!61 &8510071514475669896
 BoxCollider2D:
   m_ObjectHideFlags: 0

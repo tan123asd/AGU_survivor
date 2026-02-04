@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Enemy
   - Exp1
+  - Exp2
   layers:
   - Default
   - TransparentFX
