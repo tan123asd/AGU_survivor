@@ -63,6 +63,8 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         Debug.Log("=== DIE() CALLED ===");
         
         currentHealth = 0;
+        Debug.Log("IsDead is now: " + IsDead);
+        
         if (healthBar != null)
             healthBar.SetHealth(0);
 
