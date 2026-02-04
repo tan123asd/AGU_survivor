@@ -8,6 +8,7 @@ public class Player : MonoBehaviour, IDamageable
     [Header("Player Components")]
     [SerializeField] private PlayerHealth playerHealth;
     [SerializeField] public PlayerMovement2D playerMovement;
+    [SerializeField] private ExperienceManager experienceManage;
 
     public PlayerHealth PlayerHealth => playerHealth;
     public PlayerMovement2D PlayerMovement => playerMovement;
@@ -18,6 +19,8 @@ public class Player : MonoBehaviour, IDamageable
             playerHealth = GetComponent<PlayerHealth>();
         if (playerMovement == null)
             playerMovement = GetComponent<PlayerMovement2D>();
+        if (experienceManage == null)
+            experienceManage = GetComponent<ExperienceManager>();
     }
 
     private void Update()
@@ -37,5 +40,19 @@ public class Player : MonoBehaviour, IDamageable
     {
         if (playerHealth != null)
             playerHealth.Die();
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Exp1"))
+        {
+            Destroy(collision.gameObject);
+            experienceManage.AddExp(100);
+        }
+        else if (collision.CompareTag("Exp2"))
+        {
+            Destroy(collision.gameObject);
+            experienceManage.AddExp(200);
+        }
     }
 }
