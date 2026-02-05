@@ -1,8 +1,9 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ExperienceManager : MonoBehaviour 
+public class ExperienceManager : MonoBehaviour
 {
     [SerializeField] private AnimationCurve expCurve;
 
@@ -13,6 +14,7 @@ public class ExperienceManager : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI levelText;
     [SerializeField] private Slider expSlider;
+    [SerializeField] private ParticleSystem levelUpEffect;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -38,8 +40,30 @@ public class ExperienceManager : MonoBehaviour
         {
             currentLevel++;
             UpdateLevel();
+            GameObject player = GameObject.FindWithTag("Player");
+            if (levelUpEffect != null && player != null)
+            {
+                ParticleSystem psInstance = Instantiate(levelUpEffect, player.transform.position + new Vector3(0, -0.5f, 0), Quaternion.identity);
+                psInstance.transform.SetParent(player.transform);
+                StartCoroutine(StopFollowingAndDestroy(psInstance.gameObject, psInstance.main.duration));
+            }
         }
+    }
 
+    private IEnumerator StopFollowingAndDestroy(GameObject psObj, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if(psObj != null)
+        {
+            psObj.transform.SetParent(null);
+            ParticleSystem ps = psObj.GetComponent<ParticleSystem>();
+            if(ps != null)
+            {
+                Destroy(ps.gameObject, ps.main.duration);
+            }
+            
+        }
+        
     }
 
     private void UpdateLevel()
