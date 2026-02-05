@@ -1266,6 +1266,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   levelText: {fileID: 956358861}
   expSlider: {fileID: 677302716}
+  levelUpEffect: {fileID: 1426245440731515418, guid: ffdfb7851a968494f8fe76ee88f3791a, type: 3}
 --- !u!1 &956358859
 GameObject:
   m_ObjectHideFlags: 0
