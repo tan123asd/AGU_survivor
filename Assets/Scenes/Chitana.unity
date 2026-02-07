@@ -6002,6 +6002,7 @@ MonoBehaviour:
   maxHealth: 100
   currentHealth: 0
   healthBar: {fileID: 373058892}
+  damageFromEnemy: 10
 --- !u!4 &1809979038
 Transform:
   m_ObjectHideFlags: 0
@@ -6023,6 +6024,6 @@ SceneRoots:
   m_Roots:
   - {fileID: 619394802}
   - {fileID: 18182177}
-  - {fileID: 519420032}
   - {fileID: 404690846}
+  - {fileID: 519420032}
   - {fileID: 631587360}
