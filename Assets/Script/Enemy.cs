@@ -3,20 +3,26 @@ using UnityEngine;
 public class Enemy : MonoBehaviour, IDamageable
 {
     public int speed = 2;
-    private GameObject player;
-    private PlayerHealth playerHealth;
-    private Animator enemyAnim;
-    private bool isHit = false;
+    protected GameObject player;
+    protected PlayerHealth playerHealth;
+    protected Animator enemyAnim;
+    protected bool isHit = false;
     public int health = 3;
-    private float damageCooldown = 1.0f;
-    private float lastDamageTime = 0f;
+    protected float damageCooldown = 1.0f;
+    protected float lastDamageTime = 0f;
     
     // Wandering variables
-    private Vector2 wanderTarget;
-    private float wanderTimer = 0f;
-    private float wanderInterval = 2f; // Thời gian đổi hướng
-    private float wanderRadius = 5f; // Phạm vi di chuyển tự do
+    protected Vector2 wanderTarget;
+    protected float wanderTimer = 0f;
+    protected float wanderInterval = 2f; // Thời gian đổi hướng
+    protected float wanderRadius = 5f; // Phạm vi di chuyển tự do
+    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
+    protected virtual void Awake()
+    {
+        // Base awake logic
+    }
+    
     void Start()
     {
         player = GameObject.FindWithTag("Player");
@@ -80,7 +86,7 @@ public class Enemy : MonoBehaviour, IDamageable
         }
     }
 
-    public void TakeDamage(int damage)
+    public virtual void TakeDamage(int damage)
     {
         // Implementation of TakeDamage method
         lastDamageTime = Time.time;
@@ -90,7 +96,7 @@ public class Enemy : MonoBehaviour, IDamageable
         Debug.Log("Enemy Health: " + health);
     }
 
-    public void Die()
+    public virtual void Die()
     {
         enemyAnim.SetBool("Dead", true);
         Destroy(gameObject, 1.0f);
@@ -112,16 +118,20 @@ public class Enemy : MonoBehaviour, IDamageable
         // Di chuyển đến điểm mục tiêu
         transform.position = Vector2.MoveTowards(transform.position, wanderTarget, speed * 0.5f * Time.deltaTime);
         
-        // Flip sprite theo hướng di chuyển
+        // Lật sprite theo hướng di chuyển
         Vector2 direction = (wanderTarget - (Vector2)transform.position).normalized;
         if (direction.x < 0)
-        {
             transform.localScale = new Vector3(-1, 1, 1);
-        }
-        else if (direction.x > 0)
-        {
+        else
             transform.localScale = new Vector3(1, 1, 1);
-        }
+    }
+
+    /// <summary>
+    /// Override để boss có thể gây damage khác nhau.
+    /// </summary>
+    protected virtual int GetDamageAmount()
+    {
+        return 10; // Damage mặc định
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
