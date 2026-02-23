@@ -271,8 +271,8 @@ MonoBehaviour:
   isGameStarted: 0
   isGameOver: 0
   isBossPhase: 0
-  timeManager: {fileID: 0}
-  enemySpawner: {fileID: 0}
+  timeManager: {fileID: 1250596909}
+  enemySpawner: {fileID: 631587359}
   OnGameStart:
     m_PersistentCalls:
       m_Calls: []
@@ -1397,7 +1397,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5894cf2f79a65224ca9026aeebd90a5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TimeUI
-  timeText: {fileID: 0}
+  timeText: {fileID: 260109896}
   timerFillBar: {fileID: 0}
   warningPanel: {fileID: 0}
   warningThreshold: 60
@@ -1477,8 +1477,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: beb3fe910daf5e44f8c1ac0a01f128c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TimeManager
-  currentMapConfig: {fileID: 0}
-  customTimeLimit: 900
+  currentMapConfig: {fileID: 11400000, guid: fcd78d71f0d0562439d012af658fb346, type: 2}
+  customTimeLimit: 60
   bossSpawnInterval: 60
   completionTimeAfterBoss: 120
   elapsedTime: 0
