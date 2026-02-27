@@ -1,7 +1,7 @@
 using UnityEngine;
 
 public class Enemy : MonoBehaviour, IDamageable
-{
+{/// đâsdasdasd
     public int speed = 2;
     protected GameObject player;
     protected PlayerHealth playerHealth;
