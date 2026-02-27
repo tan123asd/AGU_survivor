@@ -1,12 +1,12 @@
 using UnityEngine;
 
 public class Enemy : MonoBehaviour, IDamageable
-{
+{/// đâsdasdasd
     public int speed = 2;
-    private GameObject player;
-    private PlayerHealth playerHealth;
-    private Animator enemyAnim;
-    private bool isHit = false;
+    protected GameObject player;
+    protected PlayerHealth playerHealth;
+    protected Animator enemyAnim;
+    protected bool isHit = false;
     public int health = 3;
     private float damageCooldown = 1.0f;
     private float lastDamageTime = 0f;
@@ -14,13 +14,25 @@ public class Enemy : MonoBehaviour, IDamageable
     private bool isDead = false;
 
     // Wandering variables
-    private Vector2 wanderTarget;
-    private float wanderTimer = 0f;
-    private float wanderInterval = 2f; // Thời gian đổi hướng
-    private float wanderRadius = 5f; // Phạm vi di chuyển tự do
+    protected Vector2 wanderTarget;
+    protected float wanderTimer = 0f;
+    protected float wanderInterval = 2f; // Thời gian đổi hướng
+    protected float wanderRadius = 5f; // Phạm vi di chuyển tự do
+    
+    // Scale gốc để giữ khi flip sprite
+    protected Vector3 originalScale;
+    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
+    protected virtual void Awake()
+    {
+        // Base awake logic
+    }
+    
     void Start()
     {
+        // Lưu scale gốc (Boss sẽ có scale lớn hơn)
+        originalScale = transform.localScale;
+        
         player = GameObject.FindWithTag("Player");
         enemyAnim = GetComponent<Animator>();
 
@@ -67,11 +79,13 @@ public class Enemy : MonoBehaviour, IDamageable
         Vector2 direction = (player.transform.position - transform.position).normalized;
         if (direction.x < 0)
         {
-            transform.localScale = new Vector3(-1, 1, 1);
+            // Giữ scale gốc, chỉ đảo X axis
+            transform.localScale = new Vector3(-Mathf.Abs(originalScale.x), originalScale.y, originalScale.z);
         }
         else
         {
-            transform.localScale = new Vector3(1, 1, 1);
+            // Giữ scale gốc
+            transform.localScale = new Vector3(Mathf.Abs(originalScale.x), originalScale.y, originalScale.z);
         }
         if (health <= 0)
         {
@@ -87,7 +101,7 @@ public class Enemy : MonoBehaviour, IDamageable
         }
     }
 
-    public void TakeDamage(int damage)
+    public virtual void TakeDamage(int damage)
     {
         if(isDead) return;
 
@@ -99,7 +113,7 @@ public class Enemy : MonoBehaviour, IDamageable
         Debug.Log("Enemy Health: " + health);
     }
 
-    public void Die()
+    public virtual void Die()
     {
         enemyAnim.SetBool("Dead", true);
         Invoke(nameof(SpawnExp), 0.8f);
@@ -131,13 +145,17 @@ public class Enemy : MonoBehaviour, IDamageable
         // Flip sprite theo hướng di chuyển
         Vector2 direction = (wanderTarget - (Vector2)transform.position).normalized;
         if (direction.x < 0)
-        {
-            transform.localScale = new Vector3(-1, 1, 1);
-        }
-        else if (direction.x > 0)
-        {
-            transform.localScale = new Vector3(1, 1, 1);
-        }
+            transform.localScale = new Vector3(-Mathf.Abs(originalScale.x), originalScale.y, originalScale.z);
+        else
+            transform.localScale = new Vector3(Mathf.Abs(originalScale.x), originalScale.y, originalScale.z);
+    }
+
+    /// <summary>
+    /// Override để boss có thể gây damage khác nhau.
+    /// </summary>
+    protected virtual int GetDamageAmount()
+    {
+        return 10; // Damage mặc định
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
