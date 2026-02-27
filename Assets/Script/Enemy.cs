@@ -17,6 +17,9 @@ public class Enemy : MonoBehaviour, IDamageable
     protected float wanderInterval = 2f; // Thời gian đổi hướng
     protected float wanderRadius = 5f; // Phạm vi di chuyển tự do
     
+    // Scale gốc để giữ khi flip sprite
+    protected Vector3 originalScale;
+    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     protected virtual void Awake()
     {
@@ -25,6 +28,9 @@ public class Enemy : MonoBehaviour, IDamageable
     
     void Start()
     {
+        // Lưu scale gốc (Boss sẽ có scale lớn hơn)
+        originalScale = transform.localScale;
+        
         player = GameObject.FindWithTag("Player");
         enemyAnim = GetComponent<Animator>();
         
@@ -70,11 +76,13 @@ public class Enemy : MonoBehaviour, IDamageable
         Vector2 direction = (player.transform.position - transform.position).normalized;
         if (direction.x < 0)
         {
-            transform.localScale = new Vector3(-1, 1, 1);
+            // Giữ scale gốc, chỉ đảo X axis
+            transform.localScale = new Vector3(-Mathf.Abs(originalScale.x), originalScale.y, originalScale.z);
         }
         else
         {
-            transform.localScale = new Vector3(1, 1, 1);
+            // Giữ scale gốc
+            transform.localScale = new Vector3(Mathf.Abs(originalScale.x), originalScale.y, originalScale.z);
         }
         if (health <= 0)
         {
@@ -121,9 +129,9 @@ public class Enemy : MonoBehaviour, IDamageable
         // Lật sprite theo hướng di chuyển
         Vector2 direction = (wanderTarget - (Vector2)transform.position).normalized;
         if (direction.x < 0)
-            transform.localScale = new Vector3(-1, 1, 1);
+            transform.localScale = new Vector3(-Mathf.Abs(originalScale.x), originalScale.y, originalScale.z);
         else
-            transform.localScale = new Vector3(1, 1, 1);
+            transform.localScale = new Vector3(Mathf.Abs(originalScale.x), originalScale.y, originalScale.z);
     }
 
     /// <summary>

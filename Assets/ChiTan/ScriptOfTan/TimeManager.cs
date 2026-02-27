@@ -8,7 +8,7 @@ public class TimeManager : MonoBehaviour
 {
     [Header("Map Time Settings")]
     [SerializeField] private MapConfig currentMapConfig; // Reference đến MapConfig
-    [SerializeField] private float customTimeLimit = 900f; // 15 phút mặc định (nếu không có MapConfig)
+    [SerializeField] private float customTimeLimit = 10f; // 10 giây để test nhanh
 
     [Header("Boss Phase Settings")]
     [SerializeField] private float bossSpawnInterval = 60f; // Spawn boss mới mỗi 60 giây

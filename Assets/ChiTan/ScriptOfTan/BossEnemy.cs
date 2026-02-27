@@ -10,6 +10,7 @@ public class BossEnemy : Enemy
     [SerializeField] private int bossHealthMultiplier = 10; // Boss có máu gấp 10
     [SerializeField] private int bossDamageMultiplier = 3; // Boss damage gấp 3
     [SerializeField] private float bossSpeedMultiplier = 0.7f; // Boss chậm hơn 30%
+    [SerializeField] private float bossScaleMultiplier = 10f; // Boss to gấp bao nhiêu lần (1.5 = to gấp 1.5 lần)
     [SerializeField] private Color bossColor = Color.red; // Màu đặc trưng
 
     [Header("Boss UI")]
@@ -32,9 +33,9 @@ public class BossEnemy : Enemy
         }
 
         // Scale lớn hơn để nổi bật
-        transform.localScale *= 1.5f;
+        transform.localScale *= bossScaleMultiplier;
 
-        Debug.Log($"BOSS SPAWNED! Health: {health}, Speed: {speed}");
+        Debug.Log($"BOSS SPAWNED! Health: {health}, Speed: {speed}, Scale: {bossScaleMultiplier}x");
     }
 
     /// <summary>

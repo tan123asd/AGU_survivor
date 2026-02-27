@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MapConfig
   mapName: Map 1
   mapDescription: Description of this map
-  timeLimitInSeconds: 60
+  timeLimitInSeconds: 5
   bossPrefab: {fileID: 0}
   initialBossCount: 1
   bossSpawnInterval: 30

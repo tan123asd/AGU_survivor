@@ -55,7 +55,7 @@ public class MapConfig : ScriptableObject
     private void OnValidate()
     {
         // Đảm bảo các giá trị không âm
-        timeLimitInSeconds = Mathf.Max(60f, timeLimitInSeconds); // Tối thiểu 1 phút
+        timeLimitInSeconds = Mathf.Max(5f, timeLimitInSeconds); // Tối thiểu 5 giây (cho test)
         initialBossCount = Mathf.Max(1, initialBossCount);
         bossSpawnInterval = Mathf.Max(10f, bossSpawnInterval);
         bossHealthMultiplier = Mathf.Max(1, bossHealthMultiplier);
