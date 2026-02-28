@@ -25,9 +25,31 @@ public class UpgradeButtonChoice : MonoBehaviour
     public void Setup(UpgradeData upgradeData)
     {
         upgradeOption = upgradeData;
-        iconImage.sprite = upgradeData.icon;
-        nameText.text = upgradeData.displayName;
-        descriptionText.text = upgradeData.description;
+        
+        // Lấy current weapon level nếu là upgrade mode (để hiển thị "Fireball II", "III"...)
+        int currentWeaponLevel = 1;
+        if (upgradeData.upgradeType == UpgradeData.UpgradeType.Weapon 
+            && upgradeData.weaponMode == UpgradeData.WeaponUpgradeMode.Upgrade)
+        {
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null)
+            {
+                WeaponController weaponController = player.GetComponentInChildren<WeaponController>();
+                if (weaponController != null)
+                {
+                    Weapon weapon = weaponController.GetWeapon(upgradeData.GetTargetWeaponName());
+                    if (weapon != null)
+                    {
+                        currentWeaponLevel = weapon.WeaponLevel;
+                    }
+                }
+            }
+        }
+        
+        // Dùng getters để lấy info (tự động từ WeaponData hoặc manual)
+        iconImage.sprite = upgradeData.GetIcon();
+        nameText.text = upgradeData.GetDisplayName(currentWeaponLevel);
+        descriptionText.text = upgradeData.GetDescription();
 
         gameObject.SetActive(true);
     }

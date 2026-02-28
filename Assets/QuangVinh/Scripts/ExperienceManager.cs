@@ -71,12 +71,72 @@ public class ExperienceManager : MonoBehaviour
     {
         List<UpgradeData> availableUpgrades = new List<UpgradeData>(upgradeDatas);
         List<UpgradeData> selectedUpgrades = new List<UpgradeData>();
-
-        for(int i = 0; i < count && availableUpgrades.Count > 0; i++)
+        
+        // Tìm WeaponController để kiểm tra weapon đã có
+        WeaponController weaponController = GetComponent<WeaponController>();
+        if (weaponController == null)
         {
-            int randomIndex = Random.Range(0, availableUpgrades.Count);
-            selectedUpgrades.Add(availableUpgrades[randomIndex]);
-            availableUpgrades.RemoveAt(randomIndex);
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null)
+                weaponController = player.GetComponentInChildren<WeaponController>();
+        }
+        
+        // Lọc upgrades hợp lệ
+        List<UpgradeData> validUpgrades = new List<UpgradeData>();
+        foreach (var upgrade in availableUpgrades)
+        {
+            // Stat upgrade luôn valid
+            if (upgrade.upgradeType == UpgradeData.UpgradeType.Stat)
+            {
+                validUpgrades.Add(upgrade);
+                continue;
+            }
+            
+            // Weapon upgrade
+            if (upgrade.upgradeType == UpgradeData.UpgradeType.Weapon)
+            {
+                if (upgrade.weaponMode == UpgradeData.WeaponUpgradeMode.Add)
+                {
+                    // Add mode: valid nếu chưa có weapon này
+                    GameObject weaponPrefab = upgrade.GetWeaponPrefab();
+                    if (weaponPrefab == null) continue; // Skip if no prefab
+                    
+                    Weapon weaponComponent = weaponPrefab.GetComponent<Weapon>();
+                    if (weaponComponent == null) continue; // Skip if no Weapon component
+                    
+                    if (weaponController == null || !weaponController.HasWeapon(weaponComponent.WeaponName))
+                    {
+                        validUpgrades.Add(upgrade);
+                    }
+                }
+                else if (upgrade.weaponMode == UpgradeData.WeaponUpgradeMode.Upgrade)
+                {
+                    // Upgrade mode: valid nếu ĐÃ có weapon và chưa max level
+                    if (weaponController != null)
+                    {
+                        string targetWeaponName = upgrade.GetTargetWeaponName();
+                        Weapon weapon = weaponController.GetWeapon(targetWeaponName);
+                        if (weapon != null && weapon.CanUpgrade)
+                        {
+                            validUpgrades.Add(upgrade);
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Nếu không có valid upgrades, fallback về tất cả upgrades
+        if (validUpgrades.Count == 0)
+        {
+            validUpgrades = availableUpgrades;
+        }
+
+        // Random chọn
+        for(int i = 0; i < count && validUpgrades.Count > 0; i++)
+        {
+            int randomIndex = Random.Range(0, validUpgrades.Count);
+            selectedUpgrades.Add(validUpgrades[randomIndex]);
+            validUpgrades.RemoveAt(randomIndex);
         }
 
         return selectedUpgrades.ToArray();

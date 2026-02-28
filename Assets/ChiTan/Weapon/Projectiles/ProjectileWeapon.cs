@@ -10,6 +10,23 @@ public class ProjectileWeapon : Weapon
     [SerializeField] private Transform firePoint; // Vị trí spawn đạn (optional)
     private int projectileNumber;
 
+    protected override void Start()
+    {
+        // Set weaponName để WeaponController có thể tìm được
+        weaponName = "ProjectileWeapon"; // Mỗi weapon subclass nên có tên khác nhau
+        
+        base.Start(); // Gọi base.Start() để tính stats
+    }
+
+    protected override void OnUpgrade()
+    {
+        // Effect khi upgrade: có thể thêm particle, sound, hoặc bonus stat
+        Debug.Log($"🌟 {weaponName} upgraded to level {weaponLevel}!");
+        
+        // Example: Mỗi level tăng số projectile bonus (nếu muốn)
+        // PlayerStats.Instance.numberOfProjectiles += 1;
+    }
+
     protected override void Attack()
     {
         projectileNumber = PlayerStats.Instance.numberOfProjectiles;

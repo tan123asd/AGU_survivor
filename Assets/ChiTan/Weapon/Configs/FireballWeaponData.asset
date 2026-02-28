@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7176e5d31c4537743b4428eecc714eef, type: 3}
+  m_Name: FireballWeaponData
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponData
+  weaponId: weapon_id
+  displayName: New Weapon
+  description: Weapon description
+  icon: {fileID: 0}
+  weaponPrefab: {fileID: 4892131679295754025, guid: 6bdd64e91aabce94d9dede49f34f798b, type: 3}
+  baseDamage: 2
+  baseAttackInterval: 2
+  baseRange: 10
+  maxLevel: 5
+  damagePerLevel: 1
+  cooldownReductionPerLevel: 0.05
+  rangePerLevel: 0.1
+  minPlayerLevel: 5
+  requiredWeapon: {fileID: 11400000}

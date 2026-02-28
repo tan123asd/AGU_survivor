@@ -711,6 +711,7 @@ Transform:
   - {fileID: 1809979038}
   - {fileID: 1117927529}
   - {fileID: 1317475802}
+  - {fileID: 1700426672}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &404690847
@@ -1623,6 +1624,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 45064354fa7658b4db541c87cc67a960, type: 2}
   - {fileID: 11400000, guid: aceba176dd764144685d05823c8c6cde, type: 2}
   - {fileID: 11400000, guid: 6ac2cdf3e7502aa4881fcef3ed625cd2, type: 2}
+  - {fileID: 11400000, guid: 5285d7b3c6492fa459de55c70d3637c6, type: 2}
+  - {fileID: 11400000, guid: 1ac3a434a1f697e409b828fbb22568df, type: 2}
   levelText: {fileID: 956358861}
   expSlider: {fileID: 677302716}
   levelUpEffect: {fileID: 1426245440731515418, guid: ffdfb7851a968494f8fe76ee88f3791a, type: 3}
@@ -2167,7 +2170,7 @@ GameObject:
   - component: {fileID: 1317475802}
   - component: {fileID: 1317475803}
   m_Layer: 0
-  m_Name: MagicOrb
+  m_Name: WeaponDefault
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2200,9 +2203,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e657ece8e99fb3843b8cef056f9d4c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileWeapon
-  damage: 10
-  attackInterval: 1
-  range: 10
+  weaponData: {fileID: 0}
+  weaponName: DefaultWeapon
+  weaponLevel: 1
+  maxLevel: 5
+  baseDamage: 3
+  baseAttackInterval: 1
+  baseRange: 10
   debugMode: 1
   projectilePrefab: {fileID: 7174401495918054263, guid: 217029eb9f5e3d642807772dc382893d, type: 3}
   firePoint: {fileID: 0}
@@ -7120,6 +7127,52 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 5
   m_TargetDisplay: 0
+--- !u!1 &1700426671
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1700426672}
+  - component: {fileID: 1700426673}
+  m_Layer: 0
+  m_Name: WeaponController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1700426672
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1700426671}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 404690846}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1700426673
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1700426671}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2be59b3b04cf0824fbd0b53098848fef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponController
+  weapons: []
+  maxWeapons: 6
 --- !u!1 &1794167734
 GameObject:
   m_ObjectHideFlags: 0
