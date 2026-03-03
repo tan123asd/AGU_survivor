@@ -1,20 +1,13 @@
 using UnityEngine;
 
-<<<<<<< Updated upstream
-public class Enemy : MonoBehaviour
-=======
 /// <summary>
 /// Enemy AI: chases the nearest alive player using PlayerController.GetNearestPlayer().
 /// Multiplayer-aware — automatically switches target as players die or move.
 /// </summary>
 public class Enemy : MonoBehaviour, IDamageable
->>>>>>> Stashed changes
 {
     [Header("Stats")]
     public int speed = 2;
-<<<<<<< Updated upstream
-    private GameObject player;
-=======
     public int health = 3;
 
     [Header("Damage")]
@@ -23,14 +16,9 @@ public class Enemy : MonoBehaviour, IDamageable
 
     // ─── Private state ────────────────────────────────────────────────────────
     private Player targetPlayer;
->>>>>>> Stashed changes
     private Animator enemyAnim;
     private bool isHit = false;
     private float lastDamageTime = 0f;
-<<<<<<< Updated upstream
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-=======
 
     // Re-evaluate target every N seconds instead of every frame
     private float targetRefreshInterval = 1f;
@@ -43,20 +31,16 @@ public class Enemy : MonoBehaviour, IDamageable
     private float wanderRadius = 5f;
 
     // ─── Lifecycle ────────────────────────────────────────────────────────────
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
     private void Start()
->>>>>>> Stashed changes
     {
         enemyAnim = GetComponent<Animator>();
-<<<<<<< Updated upstream
-=======
         RefreshTarget(); // Find nearest player at spawn
->>>>>>> Stashed changes
     }
 
+    // Update is called once per frame
     private void Update()
     {
-<<<<<<< Updated upstream
-=======
         // Refresh target periodically (cheap polling instead of per-frame Find)
         targetRefreshTimer -= Time.deltaTime;
         if (targetRefreshTimer <= 0f)
@@ -72,9 +56,7 @@ public class Enemy : MonoBehaviour, IDamageable
             return;
         }
 
->>>>>>> Stashed changes
         ChasePlayer();
-        
     }
 
     private void LateUpdate()
@@ -101,36 +83,21 @@ public class Enemy : MonoBehaviour, IDamageable
 
     private void ChasePlayer()
     {
-<<<<<<< Updated upstream
-        Vector2 direction = (player.transform.position - transform.position).normalized;
-        if(direction.x < 0)
-        {
-            transform.localScale = new Vector3(-1, 1, 1);
-        }
-        else
-        {
-            transform.localScale = new Vector3(1, 1, 1);
-        }
-        if (health <= 0)
-        {
-            enemyAnim.SetBool("Dead", true);
-            Destroy(gameObject, 1.0f);
-=======
         if (targetPlayer == null) return;
 
         if (health <= 0)
         {
             Die();
             return;
->>>>>>> Stashed changes
         }
 
         Vector2 direction = (targetPlayer.transform.position - transform.position).normalized;
 
         // Flip sprite
-        transform.localScale = direction.x < 0
-            ? new Vector3(-1, 1, 1)
-            : new Vector3(1, 1, 1);
+        if (direction.x < 0)
+            transform.localScale = new Vector3(-1, 1, 1);
+        else
+            transform.localScale = new Vector3(1, 1, 1);
 
         transform.position = Vector2.MoveTowards(
             transform.position,
@@ -139,26 +106,6 @@ public class Enemy : MonoBehaviour, IDamageable
         );
     }
 
-<<<<<<< Updated upstream
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        if(collision.CompareTag("Player") && !isHit)
-        {
-            if(Time.time - lastDamageTime < damageCooldown)
-            {
-                return;
-            }
-            else
-            {
-                lastDamageTime = Time.time;
-                health--;
-                isHit = true;
-                enemyAnim.SetTrigger("Hit");
-                Debug.Log("Enemy Health: " + health);
-            }
-             
-        }
-=======
     // ─── Wander ───────────────────────────────────────────────────────────────
 
     private void WanderAround()
@@ -190,7 +137,7 @@ public class Enemy : MonoBehaviour, IDamageable
         if (enemyAnim != null)
             enemyAnim.SetTrigger("Hit");
 
-        Debug.Log($"[Enemy] Health: {health}");
+        Debug.Log("Enemy Health: " + health);
 
         if (health <= 0)
             Die();
@@ -207,30 +154,34 @@ public class Enemy : MonoBehaviour, IDamageable
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (!collision.CompareTag("Player")) return;
+        if (collision.CompareTag("Player") && !isHit)
+        {
+            if (Time.time - lastDamageTime < damageCooldown)
+                return;
 
-        // Damage cooldown
-        if (Time.time - lastDamageTime < damageCooldown) return;
+            lastDamageTime = Time.time;
+            isHit = true;
 
-        // Validate target is alive
-        IDamageable damageable = collision.GetComponent<IDamageable>();
-        if (damageable == null)
-            damageable = collision.GetComponentInChildren<IDamageable>();
+            // Damage cooldown
+            IDamageable damageable = collision.GetComponent<IDamageable>();
+            if (damageable == null)
+                damageable = collision.GetComponentInChildren<IDamageable>();
 
-        if (damageable == null) return;
+            // Check if the collided player is alive
+            PlayerHealth ph = collision.GetComponent<PlayerHealth>();
+            if (ph == null) ph = collision.GetComponentInChildren<PlayerHealth>();
+            if (ph != null && ph.IsDead) return;
 
-        // Check if the collided player is alive via PlayerHealth
-        PlayerHealth ph = collision.GetComponent<PlayerHealth>();
-        if (ph == null) ph = collision.GetComponentInChildren<PlayerHealth>();
-        if (ph != null && ph.IsDead) return;
+            if (damageable != null)
+            {
+                damageable.TakeDamage(damageToPlayer);
+                Debug.Log("Enemy damaged Player!");
+            }
 
-        lastDamageTime = Time.time;
-        damageable.TakeDamage(damageToPlayer);
-        Debug.Log("[Enemy] Damaged player!");
-
-        // Enemy takes a hit from the collision
-        if (!isHit)
-            TakeDamage(1);
->>>>>>> Stashed changes
+            // Enemy takes 1 damage on contact
+            health--;
+            enemyAnim.SetTrigger("Hit");
+            Debug.Log("Enemy Health: " + health);
+        }
     }
 }

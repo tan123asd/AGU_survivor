@@ -16,15 +16,11 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     [Header("References")]
     [Tooltip("Drag the HealthBar here in the Prefab. Leave empty to auto-find in scene.")]
     [SerializeField] private HealthBar healthBar;
-<<<<<<< Updated upstream
-
-=======
     [SerializeField] private int damageFromEnemy = 10;
 
     private Animator animator;
     private float lastDamageTime = -999f;
     private float damageCooldown = 1.0f;
->>>>>>> Stashed changes
 
     // ─── Properties ───────────────────────────────────────────────────────────
     public int  MaxHealth     => maxHealth;
@@ -36,8 +32,6 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     {
         if (currentHealth <= 0)
             currentHealth = maxHealth;
-<<<<<<< Updated upstream
-=======
 
         animator = GetComponent<Animator>();
         if (animator == null) animator = GetComponentInParent<Animator>();
@@ -47,7 +41,6 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             Debug.Log("[PlayerHealth] Animator found.");
         else
             Debug.LogError("[PlayerHealth] Animator NOT found! Player needs an Animator component.");
->>>>>>> Stashed changes
     }
 
     private void Start()
@@ -69,7 +62,6 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
     /// <summary>
     /// Called by PlayerSpawner to inject the runtime-instantiated HealthBar.
-    /// Must be called BEFORE Start() runs, e.g. immediately after Instantiate().
     /// </summary>
     public void SetHealthBar(HealthBar hb)
     {
@@ -94,21 +86,12 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
     public void Die()
     {
-<<<<<<< Updated upstream
-        currentHealth = 0;
-=======
         Debug.Log("[PlayerHealth] Player died.");
         currentHealth = 0;
 
->>>>>>> Stashed changes
         if (healthBar != null)
-            healthBar.SetHealth(0);       
+            healthBar.SetHealth(0);
 
-<<<<<<< Updated upstream
-        // Destroy player ngay khi chết
-        GameObject.FindObjectOfType<Player>().enabled = false;
-        // TODO: load scene end game (làm sau) — có thể gọi trước Destroy với delay, hoặc dùng SceneManager.LoadScene trong callback
-=======
         if (animator != null)
             animator.SetTrigger("Die");
         else
@@ -124,12 +107,19 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         if (col == null) col = GetComponentInParent<Collider2D>();
         if (col != null) col.enabled = false;
 
-        // Notify PlayerController so OnAllPlayersDied can fire
+        // Disable player component (your original approach, done safely)
         Player player = GetComponent<Player>();
         if (player == null) player = GetComponentInParent<Player>();
-        if (player != null && PlayerController.Instance != null)
-            PlayerController.Instance.NotifyPlayerDied(player);
->>>>>>> Stashed changes
+        if (player != null)
+        {
+            player.enabled = false;
+            // Notify PlayerController so OnAllPlayersDied can fire
+            if (PlayerController.Instance != null)
+                PlayerController.Instance.NotifyPlayerDied(player);
+        }
+
+        // TODO: load scene end game sau 2 giây (làm sau)
+        // Invoke("LoadGameOverScene", 2f);
     }
 
     // ─── Heal ─────────────────────────────────────────────────────────────────
@@ -140,8 +130,6 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         if (healthBar != null)
             healthBar.SetHealth(currentHealth);
     }
-<<<<<<< Updated upstream
-=======
 
     // ─── Collision ────────────────────────────────────────────────────────────
     private void OnTriggerEnter2D(Collider2D collision)
@@ -153,5 +141,4 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         TakeDamage(damageFromEnemy);
         Debug.Log("[PlayerHealth] Took damage from Enemy.");
     }
->>>>>>> Stashed changes
 }

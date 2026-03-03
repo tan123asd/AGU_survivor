@@ -14,27 +14,19 @@ public class PlayerMovement2D : MonoBehaviour
     private Rigidbody2D rb;
     private Animator animator;
     private SpriteRenderer spriteRenderer;
-<<<<<<< Updated upstream
-    
-=======
     private PlayerHealth playerHealth;
 
->>>>>>> Stashed changes
     private Vector2 moveInput;
     private bool inputEnabled = true;
 
     // ─── Lifecycle ────────────────────────────────────────────────────────────
     private void Awake()
     {
-<<<<<<< Updated upstream
-        // Lấy component trên chính object này hoặc trên parent (không dùng transform.parent để tránh null khi parent chưa có)
-        rb = GetComponentInParent<Rigidbody2D>();
-        animator = GetComponentInParent<Animator>();
+        // Lấy component trên chính object này hoặc trên parent
+        // (không dùng transform.parent để tránh null khi parent chưa có)
+        rb             = GetComponentInParent<Rigidbody2D>();
+        animator       = GetComponentInParent<Animator>();
         spriteRenderer = GetComponentInParent<SpriteRenderer>();
-=======
-        rb              = GetComponentInParent<Rigidbody2D>();
-        animator        = GetComponentInParent<Animator>();
-        spriteRenderer  = GetComponentInParent<SpriteRenderer>();
 
         // Find PlayerHealth on self, parent, or sibling
         playerHealth = GetComponent<PlayerHealth>();
@@ -45,44 +37,42 @@ public class PlayerMovement2D : MonoBehaviour
 
         if (playerHealth == null)
             Debug.LogWarning("[PlayerMovement2D] PlayerHealth not found! Movement won't stop when dead.");
->>>>>>> Stashed changes
     }
 
     private void Update()
     {
-<<<<<<< Updated upstream
-        // Đọc input từ bàn phím
-=======
         // Stop completely when dead or input locked
         if (!inputEnabled || (playerHealth != null && playerHealth.IsDead))
             return;
 
->>>>>>> Stashed changes
+        // Đọc input từ bàn phím
         GetInput();
+
+        // Cập nhật animation dựa trên trạng thái di chuyển
         UpdateAnimation();
+
+        // Lật sprite theo hướng di chuyển
         FlipSprite();
     }
 
     private void FixedUpdate()
     {
-<<<<<<< Updated upstream
-        // Di chuyển nhân vật
-=======
         if (!inputEnabled || (playerHealth != null && playerHealth.IsDead))
         {
             if (rb != null) rb.linearVelocity = Vector2.zero;
             return;
         }
 
->>>>>>> Stashed changes
+        // Di chuyển nhân vật
         Move();
     }
 
     // ─── Input ────────────────────────────────────────────────────────────────
     private void GetInput()
     {
-        float h = Input.GetAxisRaw("Horizontal");
-        float v = Input.GetAxisRaw("Vertical");
+        // Đọc input từ WASD hoặc phím mũi tên
+        float h = Input.GetAxisRaw("Horizontal"); // A/D hoặc Left/Right
+        float v = Input.GetAxisRaw("Vertical");   // W/S hoặc Up/Down
         moveInput = new Vector2(h, v).normalized;
     }
 
