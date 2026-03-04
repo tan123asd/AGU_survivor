@@ -2,11 +2,9 @@ using UnityEngine;
 
 /// <summary>
 /// Smooth-follow camera for the local player.
-/// 
-/// Priority order for follow target:
-///   1. Manually assigned [SerializeField] target (set in Inspector)
-///   2. Auto-resolved from PlayerController.GetLocalPlayer() at Start()
+/// Priority: manually assigned [SerializeField] target → PlayerController.GetLocalPlayer().RootTransform
 /// </summary>
+[DefaultExecutionOrder(-1)]   // After PlayerSpawner(-50), before Enemy(0)
 public class CameraDirector : MonoBehaviour
 {
     [Header("Follow Target")]
@@ -49,8 +47,9 @@ public class CameraDirector : MonoBehaviour
         Player local = PlayerController.Instance.GetLocalPlayer();
         if (local != null)
         {
-            target = local.transform;
-            Debug.Log($"[CameraDirector] Auto-assigned target: {local.name}");
+            // Use RootTransform — always the root GameObject, even if Player.cs is on a child
+            target = local.RootTransform;
+            Debug.Log($"[CameraDirector] Auto-assigned target: {local.name} (root: {target.name})");
         }
     }
 

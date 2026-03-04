@@ -1,10 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Spawns one or more players at the start of the game. 
-
-/// </summary>
+// Run before CameraDirector (-1) and Enemy (0) so the player is registered
+// in PlayerController before any other Start() tries to find it.
+[DefaultExecutionOrder(-50)]
 public class PlayerSpawner : MonoBehaviour
 {
     // ─── Inspector ────────────────────────────────────────────────────────────
@@ -101,6 +100,10 @@ public class PlayerSpawner : MonoBehaviour
             if (player != null)
             {
                 player.SetPlayerIndex(i);
+
+                // ── FIX: always anchor root transform to the instantiated object
+                // (in case Player.cs is on a child object inside the prefab)
+                player.SetRootTransform(playerObj.transform);
 
                 // Wire HealthBar directly into PlayerHealth
                 if (healthBar != null)
