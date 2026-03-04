@@ -1,0 +1,34 @@
+# Unity YAML files - use UnityYAMLMerge for smart merging
+*.unity merge=unityyamlmerge eol=lf
+*.prefab merge=unityyamlmerge eol=lf
+*.asset merge=unityyamlmerge eol=lf
+*.mat merge=unityyamlmerge eol=lf
+*.anim merge=unityyamlmerge eol=lf
+*.controller merge=unityyamlmerge eol=lf
+*.meta merge=unityyamlmerge eol=lf
+
+# Image files
+*.jpg binary
+*.png binary
+*.psd binary
+*.tga binary
+*.tif binary
+*.tiff binary
+
+# Audio files
+*.mp3 binary
+*.wav binary
+*.ogg binary
+
+# Font files
+*.ttf binary
+*.otf binary
+
+# 3D model files
+*.fbx binary
+*.obj binary
+*.max binary
+*.blend binary
+*.dae binary
+*.mb binary
+*.ma binary

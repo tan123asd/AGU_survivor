@@ -15,6 +15,7 @@ public abstract class Weapon : MonoBehaviour
     
     protected float attackTimer = 0f;
     protected Transform player;
+    protected PlayerHealth playerHealth;
     
     protected virtual void Start()
     {
@@ -25,10 +26,34 @@ public abstract class Weapon : MonoBehaviour
         {
             Debug.LogWarning("Weapon: Cannot find Player!");
         }
+        
+        // Tìm PlayerHealth từ GameObject con của Player
+        if (player != null)
+        {
+            Transform playerHealthTransform = player.Find("PlayerHealth");
+            if (playerHealthTransform != null)
+            {
+                playerHealth = playerHealthTransform.GetComponent<PlayerHealth>();
+                if (debugMode)
+                {
+                    Debug.Log("Weapon found PlayerHealth successfully!");
+                }
+            }
+            else if (debugMode)
+            {
+                Debug.LogWarning("Weapon: Cannot find PlayerHealth child GameObject!");
+            }
+        }
     }
     
     protected virtual void Update()
     {
+        // Không tấn công nếu Player đã chết
+        if (playerHealth != null && playerHealth.IsDead)
+        {
+            return;
+        }
+        
         attackTimer += Time.deltaTime;
         
         if (attackTimer >= attackInterval)
