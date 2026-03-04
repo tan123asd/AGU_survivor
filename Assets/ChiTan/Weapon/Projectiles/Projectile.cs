@@ -68,8 +68,19 @@ public class Projectile : MonoBehaviour
                 Debug.Log($"Projectile hit enemy for {damage} damage!");
             }
             
+            // Gọi virtual method để subclass có thể override (ví dụ: thêm burning effect)
+            OnHitEnemy(other);
+            
             // Hủy viên đạn
             Destroy(gameObject);
         }
+    }
+
+    /// <summary>
+    /// Virtual method để subclass override và thêm effect riêng
+    /// </summary>
+    protected virtual void OnHitEnemy(Collider2D enemyCollider)
+    {
+        // Base implementation: không làm gì
     }
 }

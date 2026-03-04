@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2343701957802318211}
-  - component: {fileID: 4542556962265253170}
+  - component: {fileID: 3853074873626134158}
   m_Layer: 0
   m_Name: FireBall
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4542556962265253170
+--- !u!114 &3853074873626134158
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -41,16 +41,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 4892131679295754025}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e657ece8e99fb3843b8cef056f9d4c0a, type: 3}
+  m_Script: {fileID: 11500000, guid: 3218778b8e57ba54eb7a429b4ce284e9, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ProjectileWeapon
+  m_EditorClassIdentifier: Assembly-CSharp::FireballWeapon
   weaponData: {fileID: 11400000, guid: 8acff59e83ec6bc4c920d640df505505, type: 2}
   weaponName: FireBall
   weaponLevel: 1
   maxLevel: 5
   baseDamage: 10
-  baseAttackInterval: 1.5
+  baseAttackInterval: 3
   baseRange: 10
   debugMode: 1
   projectilePrefab: {fileID: 2176621843390485237, guid: b56b7cc270600e14b85620c077150393, type: 3}
   firePoint: {fileID: 0}
+  bonusProjectilesPerLevel: 2
