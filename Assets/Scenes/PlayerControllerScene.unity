@@ -224,7 +224,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 456683608}
-  - component: {fileID: 456683607}
+  - component: {fileID: 456683609}
   m_Layer: 0
   m_Name: PlayerSpawner
   m_TagString: Untagged
@@ -232,7 +232,22 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &456683607
+--- !u!4 &456683608
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 456683606}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -4.60894, y: 1.09868, z: -1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &456683609
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -241,7 +256,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 456683606}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cd5b4e1ce9da7484ab715fc4fd401f02, type: 3}
+  m_Script: {fileID: 11500000, guid: bdd2f29b25a603343b894d8863c28915, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSpawner
   playerPrefabs:
@@ -254,21 +269,6 @@ MonoBehaviour:
   spawnRadius: 5
   mapCenter: {x: 0, y: 0}
   showDebugLogs: 1
---- !u!4 &456683608
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 456683606}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.60894, y: 1.09868, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -419,7 +419,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd3dbef3f0775649b8f05282dcbbfed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraDirector
-  target: {fileID: 0}
+  target: {fileID: 735581349743616923, guid: 3be88e485eb99264c96df9b89724b029, type: 3}
   offset: {x: 0, y: 0, z: -10}
   smoothTime: 0.3
 --- !u!1 &619394800
@@ -542,6 +542,8 @@ MonoBehaviour:
   - {fileID: 7441429887425416535, guid: e8764f62164f5674d96ddfb8cd8a7fea, type: 3}
   - {fileID: 7441429887425416535, guid: 4a6546a9f6f40934aa0274be07ceb9f0, type: 3}
   mainCamera: {fileID: 519420031}
+  bossPrefab: {fileID: 0}
+  mapConfig: {fileID: 0}
 --- !u!4 &631587360
 Transform:
   m_ObjectHideFlags: 0

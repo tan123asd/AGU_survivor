@@ -13,6 +13,7 @@ public class Player : MonoBehaviour, IDamageable
     [Header("Player Components")]
     [SerializeField] private PlayerHealth playerHealth;
     [SerializeField] public PlayerMovement2D playerMovement;
+    [SerializeField] private ExperienceManager experienceManager;
 
     // ─── Properties ───────────────────────────────────────────────────────────
     public PlayerHealth PlayerHealth => playerHealth;
@@ -48,6 +49,11 @@ public class Player : MonoBehaviour, IDamageable
             playerMovement = GetComponentInChildren<PlayerMovement2D>();
         if (playerMovement == null)
             playerMovement = GetComponent<PlayerMovement2D>();
+
+        if (experienceManager == null)
+            experienceManager = GetComponent<ExperienceManager>();
+        if (experienceManager == null)
+            experienceManager = GetComponentInChildren<ExperienceManager>();
 
         // Register with the central manager
         if (PlayerController.Instance != null)
@@ -90,5 +96,22 @@ public class Player : MonoBehaviour, IDamageable
         // Notify the central manager so it can fire events
         if (PlayerController.Instance != null)
             PlayerController.Instance.NotifyPlayerDied(this);
+    }
+
+    // ─── XP Orb Collection (migrated from Player_Vinh) ────────────────────────
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (experienceManager == null) return;
+
+        if (collision.CompareTag("Exp1"))
+        {
+            Destroy(collision.gameObject);
+            experienceManager.AddExp(100);
+        }
+        else if (collision.CompareTag("Exp2"))
+        {
+            Destroy(collision.gameObject);
+            experienceManager.AddExp(200);
+        }
     }
 }

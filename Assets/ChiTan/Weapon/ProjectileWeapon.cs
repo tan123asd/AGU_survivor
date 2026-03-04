@@ -12,7 +12,15 @@ public class ProjectileWeapon : Weapon
 
     protected override void Attack()
     {
-        projectileNumber = PlayerStats.Instance.numberOfProjectiles;
+        if (PlayerStats.Instance == null)
+        {
+            Debug.LogWarning("[ProjectileWeapon] PlayerStats.Instance is null! Make sure a PlayerStats GameObject exists in the scene. Defaulting to 1 projectile.");
+            projectileNumber = 1;
+        }
+        else
+        {
+            projectileNumber = PlayerStats.Instance.numberOfProjectiles;
+        }
         // Tìm enemy gần nhất
         GameObject target = FindNearestEnemy();
 

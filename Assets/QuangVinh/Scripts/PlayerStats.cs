@@ -3,7 +3,28 @@ using UnityEngine;
 
 public class PlayerStats : MonoBehaviour
 {
-    public static PlayerStats Instance { get; private set; }
+    private static PlayerStats _instance;
+    public static PlayerStats Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                // Try to find one already in the scene
+                _instance = FindObjectOfType<PlayerStats>();
+
+                // Still null? Create one automatically
+                if (_instance == null)
+                {
+                    GameObject go = new GameObject("PlayerStats (Auto-Created)");
+                    _instance = go.AddComponent<PlayerStats>();
+                    DontDestroyOnLoad(go);
+                    Debug.LogWarning("[PlayerStats] No PlayerStats found in scene — created one automatically. Consider adding it to your scene manually.");
+                }
+            }
+            return _instance;
+        }
+    }
 
     [SerializeField] private float baseMoveSpeed = 5f;
     [SerializeField] private float baseDamage = 10f;
@@ -13,9 +34,9 @@ public class PlayerStats : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance == null)
+        if (_instance == null)
         {
-            Instance = this;
+            _instance = this;
             DontDestroyOnLoad(gameObject);
         }
         else

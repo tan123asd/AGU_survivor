@@ -10,7 +10,25 @@ using UnityEngine.Events;
 public class PlayerController : MonoBehaviour
 {
     // ─── Singleton ────────────────────────────────────────────────────────────
-    public static PlayerController Instance { get; private set; }
+    private static PlayerController _instance;
+    public static PlayerController Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = FindObjectOfType<PlayerController>();
+                if (_instance == null)
+                {
+                    GameObject go = new GameObject("PlayerController (Auto-Created)");
+                    _instance = go.AddComponent<PlayerController>();
+                    DontDestroyOnLoad(go);
+                    Debug.LogWarning("[PlayerController] No PlayerController found in scene — created one automatically.");
+                }
+            }
+            return _instance;
+        }
+    }
 
     // ─── Events ───────────────────────────────────────────────────────────────
     /// <summary>Fired when any player dies.</summary>
@@ -28,12 +46,12 @@ public class PlayerController : MonoBehaviour
     // ─── Lifecycle ────────────────────────────────────────────────────────────
     private void Awake()
     {
-        if (Instance != null && Instance != this)
+        if (_instance != null && _instance != this)
         {
             Destroy(gameObject);
             return;
         }
-        Instance = this;
+        _instance = this;
         DontDestroyOnLoad(gameObject);
     }
 

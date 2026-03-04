@@ -1,187 +1,215 @@
 using UnityEngine;
 
-/// <summary>
-/// Enemy AI: chases the nearest alive player using PlayerController.GetNearestPlayer().
-/// Multiplayer-aware — automatically switches target as players die or move.
-/// </summary>
 public class Enemy : MonoBehaviour, IDamageable
-{
-    [Header("Stats")]
+{/// đâsdasdasd
     public int speed = 2;
+    protected GameObject player;
+    protected PlayerHealth playerHealth;
+    protected Animator enemyAnim;
+    protected bool isHit = false;
     public int health = 3;
-
-    [Header("Damage")]
-    [SerializeField] private int damageToPlayer = 10;
-    [SerializeField] private float damageCooldown = 1.0f;
-
-    // ─── Private state ────────────────────────────────────────────────────────
-    private Player targetPlayer;
-    private Animator enemyAnim;
-    private bool isHit = false;
+    private float damageCooldown = 1.0f;
     private float lastDamageTime = 0f;
+    public GameObject[] expSpawn;
+    private bool isDead = false;
 
-    // Re-evaluate target every N seconds instead of every frame
-    private float targetRefreshInterval = 1f;
-    private float targetRefreshTimer = 0f;
-
-    // Wandering (when all players dead)
-    private Vector2 wanderTarget;
-    private float wanderTimer = 0f;
-    private float wanderInterval = 2f;
-    private float wanderRadius = 5f;
-
-    // ─── Lifecycle ────────────────────────────────────────────────────────────
+    // Wandering variables
+    protected Vector2 wanderTarget;
+    protected float wanderTimer = 0f;
+    protected float wanderInterval = 2f; // Thời gian đổi hướng
+    protected float wanderRadius = 5f; // Phạm vi di chuyển tự do
+    
+    // Scale gốc để giữ khi flip sprite
+    protected Vector3 originalScale;
+    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    private void Start()
+    protected virtual void Awake()
     {
+        // Base awake logic
+    }
+    
+    void Start()
+    {
+        // Lưu scale gốc (Boss sẽ có scale lớn hơn)
+        originalScale = transform.localScale;
+        
+        player = GameObject.FindWithTag("Player");
         enemyAnim = GetComponent<Animator>();
-        RefreshTarget(); // Find nearest player at spawn
+
+        // Tìm PlayerHealth - NÓ LÀ GAMEOBJECT CON, không phải component!
+        if (player != null)
+        {
+            // Tìm GameObject con tên "PlayerHealth"
+            Transform playerHealthTransform = player.transform.Find("PlayerHealth");
+            if (playerHealthTransform != null)
+            {
+                playerHealth = playerHealthTransform.GetComponent<PlayerHealth>();
+                Debug.Log("Enemy found PlayerHealth on child GameObject!");
+            }
+            else
+            {
+                Debug.LogError("Cannot find PlayerHealth child GameObject!");
+            }
+        }
     }
 
     // Update is called once per frame
-    private void Update()
+    void Update()
     {
-        // Refresh target periodically (cheap polling instead of per-frame Find)
-        targetRefreshTimer -= Time.deltaTime;
-        if (targetRefreshTimer <= 0f)
-        {
-            RefreshTarget();
-            targetRefreshTimer = targetRefreshInterval;
-        }
-
-        // All players dead → wander
-        if (targetPlayer == null)
+        // Nếu Player chết rồi thì di chuyển tự do
+        if (playerHealth != null && playerHealth.IsDead)
         {
             WanderAround();
             return;
         }
 
         ChasePlayer();
+
     }
 
-    private void LateUpdate()
+    void LateUpdate()
     {
         isHit = false;
     }
 
-    // ─── Target ───────────────────────────────────────────────────────────────
-
-    private void RefreshTarget()
-    {
-        if (PlayerController.Instance == null) return;
-
-        Player nearest = PlayerController.Instance.GetNearestPlayer(transform.position);
-
-        // Accept new target only if it's alive
-        if (nearest != null && nearest.PlayerHealth != null && !nearest.PlayerHealth.IsDead)
-            targetPlayer = nearest;
-        else
-            targetPlayer = null;
-    }
-
-    // ─── Chase ────────────────────────────────────────────────────────────────
-
     private void ChasePlayer()
     {
-        if (targetPlayer == null) return;
+        if (player == null) return;
 
+        Vector2 direction = (player.transform.position - transform.position).normalized;
+        if (direction.x < 0)
+        {
+            // Giữ scale gốc, chỉ đảo X axis
+            transform.localScale = new Vector3(-Mathf.Abs(originalScale.x), originalScale.y, originalScale.z);
+        }
+        else
+        {
+            // Giữ scale gốc
+            transform.localScale = new Vector3(Mathf.Abs(originalScale.x), originalScale.y, originalScale.z);
+        }
         if (health <= 0)
         {
-            Die();
-            return;
+            if (!isDead)
+            {
+                isDead = true;
+                Die();
+            }
         }
-
-        Vector2 direction = (targetPlayer.transform.position - transform.position).normalized;
-
-        // Flip sprite
-        if (direction.x < 0)
-            transform.localScale = new Vector3(-1, 1, 1);
         else
-            transform.localScale = new Vector3(1, 1, 1);
-
-        transform.position = Vector2.MoveTowards(
-            transform.position,
-            targetPlayer.transform.position,
-            speed * Time.deltaTime
-        );
+        {
+            transform.position = Vector2.MoveTowards(transform.position, player.transform.position, speed * Time.deltaTime);
+        }
     }
 
-    // ─── Wander ───────────────────────────────────────────────────────────────
+    public virtual void TakeDamage(int damage)
+    {
+        if(isDead) return;
+
+        // Implementation of TakeDamage method
+        lastDamageTime = Time.time;
+        health -= damage;
+        isHit = true;
+        enemyAnim.SetTrigger("Hit");
+        Debug.Log("Enemy Health: " + health);
+    }
+
+    public virtual void Die()
+    {
+        enemyAnim.SetBool("Dead", true);
+        Invoke(nameof(SpawnExp), 0.8f);
+        Destroy(gameObject, 1.0f);
+    }
+
+    private void SpawnExp()
+    {
+        int index = Random.Range(0, expSpawn.Length);
+        Instantiate(expSpawn[index], transform.position, transform.rotation);
+    }
 
     private void WanderAround()
     {
         wanderTimer -= Time.deltaTime;
 
+        // Chọn điểm ngẫu nhiên mới khi hết thời gian
         if (wanderTimer <= 0)
         {
-            wanderTarget = (Vector2)transform.position + Random.insideUnitCircle * wanderRadius;
+            // Tạo vị trí ngẫu nhiên quanh vị trí hiện tại
+            Vector2 randomDirection = Random.insideUnitCircle * wanderRadius;
+            wanderTarget = (Vector2)transform.position + randomDirection;
             wanderTimer = wanderInterval;
         }
 
-        transform.position = Vector2.MoveTowards(
-            transform.position, wanderTarget, speed * 0.5f * Time.deltaTime);
+        // Di chuyển đến điểm mục tiêu
+        transform.position = Vector2.MoveTowards(transform.position, wanderTarget, speed * 0.5f * Time.deltaTime);
 
-        Vector2 dir = (wanderTarget - (Vector2)transform.position).normalized;
-        if (dir.x < 0)       transform.localScale = new Vector3(-1, 1, 1);
-        else if (dir.x > 0)  transform.localScale = new Vector3(1, 1, 1);
+        // Flip sprite theo hướng di chuyển
+        Vector2 direction = (wanderTarget - (Vector2)transform.position).normalized;
+        if (direction.x < 0)
+            transform.localScale = new Vector3(-Mathf.Abs(originalScale.x), originalScale.y, originalScale.z);
+        else
+            transform.localScale = new Vector3(Mathf.Abs(originalScale.x), originalScale.y, originalScale.z);
     }
 
-    // ─── Damage ───────────────────────────────────────────────────────────────
-
-    public void TakeDamage(int damage)
+    /// <summary>
+    /// Override để boss có thể gây damage khác nhau.
+    /// </summary>
+    protected virtual int GetDamageAmount()
     {
-        lastDamageTime = Time.time;
-        health -= damage;
-        isHit = true;
-
-        if (enemyAnim != null)
-            enemyAnim.SetTrigger("Hit");
-
-        Debug.Log("Enemy Health: " + health);
-
-        if (health <= 0)
-            Die();
+        return 10; // Damage mặc định
     }
-
-    public void Die()
-    {
-        if (enemyAnim != null)
-            enemyAnim.SetBool("Dead", true);
-        Destroy(gameObject, 1.0f);
-    }
-
-    // ─── Collision ────────────────────────────────────────────────────────────
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player") && !isHit)
+        if (collision.CompareTag("Player"))
         {
-            if (Time.time - lastDamageTime < damageCooldown)
+            // Tìm PlayerHealth nếu chưa có
+            if (playerHealth == null && player != null)
+            {
+                Transform playerHealthTransform = player.transform.Find("PlayerHealth");
+                if (playerHealthTransform != null)
+                {
+                    playerHealth = playerHealthTransform.GetComponent<PlayerHealth>();
+                }
+            }
+
+            // Không tấn công nếu Player đã chết
+            if (playerHealth != null && playerHealth.IsDead)
+            {
+                Debug.Log("Enemy collision but Player is dead - skipping damage");
                 return;
+            }
+
+            if (playerHealth == null)
+            {
+                Debug.LogError("PlayerHealth is NULL in Enemy OnTriggerEnter2D!");
+                return;
+            }
+
+            if (Time.time - lastDamageTime < damageCooldown)
+            {
+                return;
+            }
 
             lastDamageTime = Time.time;
-            isHit = true;
 
-            // Damage cooldown
-            IDamageable damageable = collision.GetComponent<IDamageable>();
-            if (damageable == null)
-                damageable = collision.GetComponentInChildren<IDamageable>();
+            // Tìm IDamageable trên GameObject Player hoặc các con của nó
+            IDamageable playerDamageable = collision.GetComponent<IDamageable>();
+            if (playerDamageable == null)
+                playerDamageable = collision.GetComponentInChildren<IDamageable>();
 
-            // Check if the collided player is alive
-            PlayerHealth ph = collision.GetComponent<PlayerHealth>();
-            if (ph == null) ph = collision.GetComponentInChildren<PlayerHealth>();
-            if (ph != null && ph.IsDead) return;
-
-            if (damageable != null)
+            if (playerDamageable != null)
             {
-                damageable.TakeDamage(damageToPlayer);
+                playerDamageable.TakeDamage(10); // Player mất 10 máu
                 Debug.Log("Enemy damaged Player!");
             }
 
-            // Enemy takes 1 damage on contact
-            health--;
-            enemyAnim.SetTrigger("Hit");
-            Debug.Log("Enemy Health: " + health);
+            // Enemy cũng nhận damage
+            if (!isHit)
+            {
+                TakeDamage(1);
+            }
         }
     }
+
+
 }

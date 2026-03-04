@@ -105,29 +105,29 @@ public class PlayerSpawner : MonoBehaviour
                 // (in case Player.cs is on a child object inside the prefab)
                 player.SetRootTransform(playerObj.transform);
 
-                // Wire HealthBar directly into PlayerHealth
-                if (healthBar != null)
-                {
-                    PlayerHealth ph = playerObj.GetComponentInChildren<PlayerHealth>();
-                    if (ph == null) ph = playerObj.GetComponent<PlayerHealth>();
-                    if (ph != null)
-                    {
-                        ph.SetHealthBar(healthBar);
-                        if (showDebugLogs)
-                            Debug.Log($"[PlayerSpawner] HealthBar wired to {playerObj.name}");
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"[PlayerSpawner] No PlayerHealth found on {playerObj.name}!");
-                    }
-                }
-
                 if (showDebugLogs)
                     Debug.Log($"[PlayerSpawner] Spawned {playerObj.name} at {spawnPos} (index {i})");
             }
             else
             {
-                Debug.LogWarning($"[PlayerSpawner] '{playerObj.name}' has no Player component!");
+                Debug.LogWarning($"[PlayerSpawner] '{playerObj.name}' has no Player component! Camera follow and PlayerController registration will not work.");
+            }
+
+            // ── Wire HealthBar — always runs, regardless of Player component ──────
+            if (healthBar != null)
+            {
+                PlayerHealth ph = playerObj.GetComponentInChildren<PlayerHealth>();
+                if (ph == null) ph = playerObj.GetComponent<PlayerHealth>();
+                if (ph != null)
+                {
+                    ph.SetHealthBar(healthBar);
+                    if (showDebugLogs)
+                        Debug.Log($"[PlayerSpawner] HealthBar wired to {playerObj.name}");
+                }
+                else
+                {
+                    Debug.LogWarning($"[PlayerSpawner] No PlayerHealth found on {playerObj.name}!");
+                }
             }
         }
     }
@@ -148,7 +148,9 @@ public class PlayerSpawner : MonoBehaviour
             {
                 // Wrap around if more players than points
                 Transform pt = shuffled[i % shuffled.Count];
-                result.Add(pt != null ? pt.position : GetRandomPosition());
+                Vector3 ptPos = pt != null ? pt.position : GetRandomPosition();
+                ptPos.z = -1f;
+                result.Add(ptPos);
             }
         }
         else
@@ -164,7 +166,7 @@ public class PlayerSpawner : MonoBehaviour
     private Vector3 GetRandomPosition()
     {
         Vector2 offset = Random.insideUnitCircle * spawnRadius;
-        return new Vector3(mapCenter.x + offset.x, mapCenter.y + offset.y, 0f);
+        return new Vector3(mapCenter.x + offset.x, mapCenter.y + offset.y, -1f);
     }
 
     private void ShuffleList<T>(List<T> list)
