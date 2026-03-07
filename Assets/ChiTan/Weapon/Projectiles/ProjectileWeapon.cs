@@ -13,7 +13,7 @@ public class ProjectileWeapon : Weapon
     protected override void Start()
     {
         // Set weaponName để WeaponController có thể tìm được
-        weaponName = "ProjectileWeapon"; // Mỗi weapon subclass nên có tên khác nhau
+        weaponName = "DefaultWeapon"; // Khớp với UpgradeData
         
         base.Start(); // Gọi base.Start() để tính stats
     }

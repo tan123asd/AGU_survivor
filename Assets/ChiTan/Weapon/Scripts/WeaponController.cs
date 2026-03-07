@@ -12,11 +12,38 @@ public class WeaponController : MonoBehaviour
     
     private void Start()
     {
-        // Lấy tất cả weapons con của player
-        Weapon[] childWeapons = GetComponentsInChildren<Weapon>();
-        weapons.AddRange(childWeapons);
+        Debug.Log($"🔍 WeaponController.Start() on GameObject: {gameObject.name}");
         
-        Debug.Log($"Player has {weapons.Count} weapons");
+        // Tìm Player GameObject
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null)
+        {
+            Debug.LogError("❌ Cannot find Player GameObject!");
+            return;
+        }
+        
+        Debug.Log($"🔍 Looking for weapons in Player: {player.name}");
+        
+        // Lấy tất cả weapons từ PLAYER (không phải từ WeaponController)
+        Weapon[] allWeapons = player.GetComponentsInChildren<Weapon>(true);
+        
+        Debug.Log($"🔍 GetComponentsInChildren found: {allWeapons.Length} weapons");
+        
+        // Thêm weapons vào list (tránh duplicate)
+        foreach (var weapon in allWeapons)
+        {
+            if (!weapons.Contains(weapon))
+            {
+                weapons.Add(weapon);
+                Debug.Log($"  📍 Found weapon on: {weapon.gameObject.name} (component: {weapon.GetType().Name})");
+            }
+        }
+        
+        Debug.Log($"🔫 WeaponController: Found {weapons.Count} weapons");
+        foreach (var weapon in weapons)
+        {
+            Debug.Log($"  - {weapon.WeaponName} (Level {weapon.WeaponLevel}/{weapon.MaxLevel})");
+        }
     }
     
     /// <summary>

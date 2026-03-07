@@ -78,7 +78,17 @@ public class ExperienceManager : MonoBehaviour
         {
             GameObject player = GameObject.FindGameObjectWithTag("Player");
             if (player != null)
+            {
+                // Tìm trong Player và con của nó
                 weaponController = player.GetComponentInChildren<WeaponController>();
+            }
+        }
+        
+        // Fallback: Tìm trong toàn scene
+        if (weaponController == null)
+        {
+            weaponController = FindFirstObjectByType<WeaponController>();
+            Debug.LogWarning($"⚠️ WeaponController not on Player! Found at: {(weaponController != null ? weaponController.gameObject.name : "NULL")}");
         }
         
         // Lọc upgrades hợp lệ
@@ -116,18 +126,38 @@ public class ExperienceManager : MonoBehaviour
                     {
                         string targetWeaponName = upgrade.GetTargetWeaponName();
                         Weapon weapon = weaponController.GetWeapon(targetWeaponName);
+                        
+                        Debug.Log($"🔍 Checking upgrade '{upgrade.displayName}' for weapon '{targetWeaponName}':");
+                        Debug.Log($"   - Weapon found: {weapon != null}");
+                        if (weapon != null)
+                        {
+                            Debug.Log($"   - Can upgrade: {weapon.CanUpgrade} (Level {weapon.WeaponLevel}/{weapon.MaxLevel})");
+                        }
+                        
                         if (weapon != null && weapon.CanUpgrade)
                         {
                             validUpgrades.Add(upgrade);
                         }
                     }
+                    else
+                    {
+                        Debug.LogWarning($"⚠️ WeaponController is NULL! Cannot check weapon upgrade.");
+                    }
                 }
             }
+        }
+        
+        // Debug log
+        Debug.Log($"📋 Valid upgrades: {validUpgrades.Count}/{availableUpgrades.Count}");
+        foreach (var upgrade in validUpgrades)
+        {
+            Debug.Log($"  ✅ {upgrade.GetDisplayName()}");
         }
         
         // Nếu không có valid upgrades, fallback về tất cả upgrades
         if (validUpgrades.Count == 0)
         {
+            Debug.LogWarning("⚠️ No valid upgrades! Using all upgrades as fallback.");
             validUpgrades = availableUpgrades;
         }
 
