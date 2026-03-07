@@ -16,8 +16,8 @@ MonoBehaviour:
   mapDescription: Description of this map
   timeLimitInSeconds: 5
   bossPrefab: {fileID: 0}
-  initialBossCount: 1
-  bossSpawnInterval: 30
+  initialBossCount: 2
+  bossSpawnInterval: 10
   bossHealthMultiplier: 10
   bossDamageMultiplier: 3
   completionBonusGold: 1000
