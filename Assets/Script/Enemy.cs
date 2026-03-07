@@ -122,6 +122,13 @@ public class Enemy : MonoBehaviour, IDamageable
 
     private void SpawnExp()
     {
+        // Check nếu array rỗng
+        if (expSpawn == null || expSpawn.Length == 0)
+        {
+            Debug.LogWarning($"{gameObject.name} has no EXP prefabs assigned!");
+            return;
+        }
+        
         int index = Random.Range(0, expSpawn.Length);
         Instantiate(expSpawn[index], transform.position, transform.rotation);
     }
