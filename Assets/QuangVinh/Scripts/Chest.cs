@@ -30,6 +30,7 @@ public class Chest : MonoBehaviour, IInteract
         {
             GameObject droppedItem = Instantiate(itemPrefab, transform.position + Vector3.up, Quaternion.identity);
         }
+        Destroy(gameObject, 2f);
     }
 
     public void SetOpened(bool opened)
