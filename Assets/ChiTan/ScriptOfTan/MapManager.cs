@@ -4,9 +4,9 @@ using UnityEngine.Events;
 /// <summary>
 /// Singleton quản lý toàn bộ game state và điều phối các hệ thống.
 /// </summary>
-public class GameManager : MonoBehaviour
+public class MapManager : MonoBehaviour
 {
-    public static GameManager Instance { get; private set; }
+    public static MapManager Instance { get; private set; }
 
     [Header("Game State")]
     [SerializeField] private bool isGameStarted = false;
