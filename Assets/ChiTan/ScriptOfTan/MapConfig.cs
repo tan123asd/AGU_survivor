@@ -19,7 +19,7 @@ public class MapConfig : ScriptableObject
     [Header("Boss Settings")]
     [SerializeField] private GameObject bossPrefab; // Prefab của boss
     [SerializeField] private int initialBossCount = 1; // Số boss xuất hiện đầu tiên
-    [SerializeField] private float bossSpawnInterval = 60f; // Spawn thêm boss mỗi X giây
+    [SerializeField] private float bossSpawnInterval = 10f; // Spawn thêm boss mỗi X giây
     [SerializeField] private int bossHealthMultiplier = 10; // Boss có máu gấp X lần
     [SerializeField] private int bossDamageMultiplier = 3; // Boss damage gấp X lần
 
@@ -52,15 +52,15 @@ public class MapConfig : ScriptableObject
     /// <summary>
     /// Validate dữ liệu khi tạo mới hoặc chỉnh sửa trong Inspector
     /// </summary>
-    private void OnValidate()
-    {
-        // Đảm bảo các giá trị không âm
-        timeLimitInSeconds = Mathf.Max(5f, timeLimitInSeconds); // Tối thiểu 5 giây (cho test)
-        initialBossCount = Mathf.Max(1, initialBossCount);
-        bossSpawnInterval = Mathf.Max(10f, bossSpawnInterval);
-        bossHealthMultiplier = Mathf.Max(1, bossHealthMultiplier);
-        bossDamageMultiplier = Mathf.Max(1, bossDamageMultiplier);
-        completionBonusGold = Mathf.Max(0, completionBonusGold);
-        survivalTimeRequired = Mathf.Max(0f, survivalTimeRequired);
-    }
+    // private void OnValidate()
+    // {
+    //     // Đảm bảo các giá trị không âm
+    //     timeLimitInSeconds = Mathf.Max(5f, timeLimitInSeconds); // Tối thiểu 5 giây (cho test)
+    //     initialBossCount = Mathf.Max(1, initialBossCount);
+    //     bossSpawnInterval = Mathf.Max(10f, bossSpawnInterval);
+    //     bossHealthMultiplier = Mathf.Max(1, bossHealthMultiplier);
+    //     bossDamageMultiplier = Mathf.Max(1, bossDamageMultiplier);
+    //     completionBonusGold = Mathf.Max(0, completionBonusGold);
+    //     survivalTimeRequired = Mathf.Max(0f, survivalTimeRequired);
+    // }
 }

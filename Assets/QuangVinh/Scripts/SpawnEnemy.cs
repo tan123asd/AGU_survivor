@@ -44,7 +44,7 @@ public class SpawnEnemy : MonoBehaviour
             yield return new WaitForSeconds(5f);
             
             // Kiểm tra xem có đang ở boss phase không
-            if (GameManager.Instance != null && GameManager.Instance.IsBossPhase)
+            if (MapManager.Instance != null && MapManager.Instance.IsBossPhase)
             {
                 isBossPhase = true;
                 break;
@@ -65,7 +65,7 @@ public class SpawnEnemy : MonoBehaviour
     }
 
     /// <summary>
-    /// Bắt đầu spawn boss (được gọi bởi GameManager khi hết time limit).
+    /// Bắt đầu spawn boss (được gọi bởi MapManager khi hết time limit).
     /// </summary>
     public void StartBossSpawn()
     {
