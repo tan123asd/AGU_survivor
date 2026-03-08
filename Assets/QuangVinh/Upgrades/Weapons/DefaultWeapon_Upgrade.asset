@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DefaultWeapon_Upgrade
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeData
   upgradeType: 1
-  displayName: Default Gun II
+  displayName: "V\u0169 kh\xED c\u1EE7a Player "
   description: "T\u0103ng damage v\xE0 gi\u1EA3m cooldown"
   icon: {fileID: -703694536, guid: 0d5e657ee5a074e4baa53d5b248a01d2, type: 3}
   buffEffects: []
