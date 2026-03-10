@@ -44,10 +44,10 @@ public class CameraDirector : MonoBehaviour
     {
         if (PlayerController.Instance == null) return;
 
-        Player local = PlayerController.Instance.GetLocalPlayer();
+        PlayerEntity local = PlayerController.Instance.GetLocalPlayer();
         if (local != null)
         {
-            // Use RootTransform — always the root GameObject, even if Player.cs is on a child
+            // Use RootTransform — always the root GameObject, even if PlayerEntity.cs is on a child
             target = local.RootTransform;
             Debug.Log($"[CameraDirector] Auto-assigned target: {local.name} (root: {target.name})");
         }

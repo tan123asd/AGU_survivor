@@ -94,15 +94,15 @@ public class PlayerSpawner : MonoBehaviour
             GameObject playerObj = Instantiate(prefabToSpawn, spawnPos, Quaternion.identity);
             playerObj.name = $"Player_{i}";
 
-            Player player = playerObj.GetComponent<Player>();
-            if (player == null) player = playerObj.GetComponentInChildren<Player>();
+            PlayerEntity player = playerObj.GetComponent<PlayerEntity>();
+            if (player == null) player = playerObj.GetComponentInChildren<PlayerEntity>();
 
             if (player != null)
             {
                 player.SetPlayerIndex(i);
 
                 // ── FIX: always anchor root transform to the instantiated object
-                // (in case Player.cs is on a child object inside the prefab)
+                // (in case PlayerEntity.cs is on a child object inside the prefab)
                 player.SetRootTransform(playerObj.transform);
 
                 if (showDebugLogs)
@@ -110,7 +110,7 @@ public class PlayerSpawner : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning($"[PlayerSpawner] '{playerObj.name}' has no Player component! Camera follow and PlayerController registration will not work.");
+                Debug.LogWarning($"[PlayerSpawner] '{playerObj.name}' has no PlayerEntity component! Camera follow and PlayerController registration will not work.");
             }
 
             // ── Wire HealthBar — always runs, regardless of Player component ──────

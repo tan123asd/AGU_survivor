@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 /// <summary>
-/// Singleton manager that tracks ALL active Player instances.
+/// Singleton manager that tracks ALL active PlayerEntity instances.
 /// Provides a central API for enemy AI, camera, and game logic.
 /// Multiplayer-ready: supports any number of registered players.
 /// </summary>
@@ -32,13 +32,13 @@ public class PlayerController : MonoBehaviour
 
     // ─── Events ───────────────────────────────────────────────────────────────
     /// <summary>Fired when any player dies.</summary>
-    public UnityEvent<Player> OnPlayerDied = new UnityEvent<Player>();
+    public UnityEvent<PlayerEntity> OnPlayerDied = new UnityEvent<PlayerEntity>();
 
     /// <summary>Fired when ALL registered players are dead.</summary>
     public UnityEvent OnAllPlayersDied = new UnityEvent();
 
     // ─── Internal state ───────────────────────────────────────────────────────
-    private readonly List<Player> _players = new List<Player>();
+    private readonly List<PlayerEntity> _players = new List<PlayerEntity>();
 
     [Header("Debug")]
     [SerializeField] private bool showDebugLogs = true;
@@ -57,8 +57,8 @@ public class PlayerController : MonoBehaviour
 
     // ─── Registration ─────────────────────────────────────────────────────────
 
-    /// <summary>Called by Player.Awake() to register itself.</summary>
-    public void RegisterPlayer(Player player)
+    /// <summary>Called by PlayerEntity.Awake() to register itself.</summary>
+    public void RegisterPlayer(PlayerEntity player)
     {
         if (!_players.Contains(player))
         {
@@ -68,8 +68,8 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    /// <summary>Called by Player.OnDestroy() to unregister itself.</summary>
-    public void UnregisterPlayer(Player player)
+    /// <summary>Called by PlayerEntity.OnDestroy() to unregister itself.</summary>
+    public void UnregisterPlayer(PlayerEntity player)
     {
         if (_players.Remove(player))
         {
@@ -82,7 +82,7 @@ public class PlayerController : MonoBehaviour
     /// Called by a Player when it dies.
     /// Fires OnPlayerDied and, if no players remain alive, OnAllPlayersDied.
     /// </summary>
-    public void NotifyPlayerDied(Player player)
+    public void NotifyPlayerDied(PlayerEntity player)
     {
         OnPlayerDied.Invoke(player);
 
@@ -91,7 +91,7 @@ public class PlayerController : MonoBehaviour
 
         // Check if every registered player is dead
         bool anyAlive = false;
-        foreach (Player p in _players)
+        foreach (PlayerEntity p in _players)
         {
             if (p != null && !p.PlayerHealth.IsDead)
             {
@@ -111,15 +111,15 @@ public class PlayerController : MonoBehaviour
     // ─── Queries ──────────────────────────────────────────────────────────────
 
     /// <summary>Returns a read-only snapshot of all registered players.</summary>
-    public IReadOnlyList<Player> GetAllPlayers() => _players.AsReadOnly();
+    public IReadOnlyList<PlayerEntity> GetAllPlayers() => _players.AsReadOnly();
 
     /// <summary>
     /// Returns the local player (index 0).
     /// In a future LAN setup, this would be the local machine's owned player.
     /// </summary>
-    public Player GetLocalPlayer()
+    public PlayerEntity GetLocalPlayer()
     {
-        foreach (Player p in _players)
+        foreach (PlayerEntity p in _players)
         {
             if (p != null && p.PlayerIndex == 0)
                 return p;
@@ -132,12 +132,12 @@ public class PlayerController : MonoBehaviour
     /// Returns the nearest ALIVE player to the given world position.
     /// Used by Enemy AI to decide who to chase.
     /// </summary>
-    public Player GetNearestPlayer(Vector2 position)
+    public PlayerEntity GetNearestPlayer(Vector2 position)
     {
-        Player nearest = null;
+        PlayerEntity nearest = null;
         float minDist = float.MaxValue;
 
-        foreach (Player p in _players)
+        foreach (PlayerEntity p in _players)
         {
             if (p == null) continue;
             if (p.PlayerHealth != null && p.PlayerHealth.IsDead) continue;
@@ -156,7 +156,7 @@ public class PlayerController : MonoBehaviour
     /// <summary>Enables/disables input for all registered players (e.g. on game-over cutscene).</summary>
     public void SetAllPlayersInputEnabled(bool enabled)
     {
-        foreach (Player p in _players)
+        foreach (PlayerEntity p in _players)
         {
             if (p != null && p.PlayerMovement != null)
                 p.PlayerMovement.SetInputEnabled(enabled);

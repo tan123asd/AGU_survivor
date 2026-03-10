@@ -8,7 +8,7 @@ using UnityEngine;
 /// - Exposes RootTransform: always the top-level GameObject transform,
 ///   regardless of where this script lives in the prefab hierarchy.
 /// </summary>
-public class Player : MonoBehaviour, IDamageable
+public class PlayerEntity : MonoBehaviour
 {
     [Header("Player Components")]
     [SerializeField] private PlayerHealth playerHealth;
@@ -28,7 +28,7 @@ public class Player : MonoBehaviour, IDamageable
     /// <summary>
     /// The root-most Transform of this player's GameObject hierarchy.
     /// Use this instead of transform when you need the actual world position
-    /// of the player (in case Player.cs lives on a child object).
+    /// of the player (in case PlayerEntity.cs lives on a child object).
     /// Set by PlayerSpawner immediately after Instantiate().
     /// </summary>
     public Transform RootTransform { get; private set; }
@@ -59,7 +59,7 @@ public class Player : MonoBehaviour, IDamageable
         if (PlayerController.Instance != null)
             PlayerController.Instance.RegisterPlayer(this);
         else
-            Debug.LogWarning("[Player] PlayerController.Instance is null. Make sure PlayerController exists in the scene.");
+            Debug.LogWarning("[PlayerEntity] PlayerController.Instance is null. Make sure PlayerController exists in the scene.");
     }
 
     private void OnDestroy()
@@ -82,21 +82,7 @@ public class Player : MonoBehaviour, IDamageable
         PlayerIndex = index;
     }
 
-    public void TakeDamage(int damage)
-    {
-        if (playerHealth != null)
-            playerHealth.TakeDamage(damage);
-    }
 
-    public void Die()
-    {
-        if (playerHealth != null)
-            playerHealth.Die();
-
-        // Notify the central manager so it can fire events
-        if (PlayerController.Instance != null)
-            PlayerController.Instance.NotifyPlayerDied(this);
-    }
 
     // ─── XP Orb Collection (migrated from Player_Vinh) ────────────────────────
     private void OnTriggerEnter2D(Collider2D collision)
