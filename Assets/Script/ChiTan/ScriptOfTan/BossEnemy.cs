@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using Photon.Pun;
 /// <summary>
 /// Boss Enemy - Enemy đặc biệt với stats cao hơn nhiều.
 /// Kế thừa từ Enemy để tái sử dụng logic cơ bản.
@@ -72,26 +72,27 @@ public class BossEnemy : Enemy
         return 10 * bossDamageMultiplier; // 30 damage thay vì 10
     }
 
-    // Override OnTriggerEnter2D để gây damage cao hơn
+    // Override OnTriggerEnter2D to deal boss damage via RPC
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player"))
-        {
-            // Tìm PlayerHealth
-            PlayerHealth playerHealth = collision.GetComponent<PlayerHealth>();
-            if (playerHealth == null)
-            {
-                Transform playerHealthTransform = collision.transform.Find("PlayerHealth");
-                if (playerHealthTransform != null)
-                    playerHealth = playerHealthTransform.GetComponent<PlayerHealth>();
-            }
+        // Only MasterClient applies damage
+        if (PhotonNetwork.IsMasterClient == false && PhotonNetwork.IsConnected) return;
 
-            // Gây damage cao hơn
-            if (playerHealth != null)
-            {
-                playerHealth.TakeDamage(GetDamageAmount());
-                Debug.Log($"Boss hit Player for {GetDamageAmount()} damage!");
-            }
+        if (!collision.CompareTag("Player")) return;
+
+        PlayerHealth hitHealth = collision.GetComponent<PlayerHealth>();
+        if (hitHealth == null) hitHealth = collision.GetComponentInParent<PlayerHealth>();
+        if (hitHealth == null)
+        {
+            Transform t = collision.transform.Find("PlayerHealth");
+            if (t != null) hitHealth = t.GetComponent<PlayerHealth>();
+        }
+
+        if (hitHealth != null && !hitHealth.IsDead)
+        {
+            // Use RPC so all clients apply boss damage
+            hitHealth.SendTakeDamageRPC(GetDamageAmount());
+            Debug.Log($"Boss hit Player for {GetDamageAmount()} damage!");
         }
     }
 }

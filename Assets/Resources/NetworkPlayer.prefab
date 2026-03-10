@@ -242,7 +242,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4400661342013824037}
-  - component: {fileID: 8006265131569602344}
+  - component: {fileID: 8153975868991823243}
   m_Layer: 0
   m_Name: PlayerHealth
   m_TagString: Untagged
@@ -265,7 +265,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 735581349743616923}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8006265131569602344
+--- !u!114 &8153975868991823243
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -274,9 +274,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 5110824307924145192}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1a415906d6996a0498bcc59a3420057d, type: 3}
+  m_Script: {fileID: 11500000, guid: 8597c7f0c7904b145a150e52475323d7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
+  m_EditorClassIdentifier: AGU_Scripts::PlayerHealth
   maxHealth: 100
   currentHealth: 0
   healthBar: {fileID: 0}
@@ -290,7 +290,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4335428967666070815}
-  - component: {fileID: 8113913574592034008}
+  - component: {fileID: 3329348564633790039}
   m_Layer: 0
   m_Name: PlayerMovement
   m_TagString: Untagged
@@ -313,7 +313,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 735581349743616923}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8113913574592034008
+--- !u!114 &3329348564633790039
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -322,9 +322,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 8584192081352487362}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9c72b7cbbe3dc7d4a84d43a2bb10d86e, type: 3}
+  m_Script: {fileID: 11500000, guid: 86b5f4c5b4aca804499c6e96a874f4ea, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement2D
+  m_EditorClassIdentifier: AGU_Scripts::PlayerMovement2D
   moveSpeed: 5
 --- !u!1 &8595314968871036631
 GameObject:

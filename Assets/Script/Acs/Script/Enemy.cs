@@ -1,17 +1,32 @@
+using Photon.Pun;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour, IDamageable
-{/// đâsdasdasd
+{
     public int speed = 2;
-    protected GameObject player;
-    protected PlayerHealth playerHealth;
+
+    // ─── Target (multi-player aware) ──────────────────────────────────────────
+    // Instead of a single cached GameObject, we query PlayerController each
+    // frame so we always chase the nearest ALIVE player.
+    protected PlayerEntity targetPlayer;
+    protected PlayerHealth playerHealth; // kept for wander / death check
+
     protected Animator enemyAnim;
     protected bool isHit = false;
     public int health = 3;
     private float damageCooldown = 1.0f;
     private float lastDamageTime = 0f;
-    public GameObject[] expSpawn;
+
+    // EXP drop: use the prefab NAME (string) so PhotonNetwork.Instantiate can find
+    // it in Resources/. Leave empty to disable network EXP spawn.
+    [Tooltip("Names of EXP prefabs inside Assets/Resources/. MasterClient spawns one on death.")]
+    public string[] expPrefabNames;
+    [HideInInspector] public GameObject[] expSpawn; // legacy — kept so old Inspector refs don't break
+
     private bool isDead = false;
+
+    // ─── Photon ───────────────────────────────────────────────────────────────
+    private PhotonView _photonView;
 
     // Wandering variables
     protected Vector2 wanderTarget;
@@ -21,42 +36,46 @@ public class Enemy : MonoBehaviour, IDamageable
     
     // Scale gốc để giữ khi flip sprite
     protected Vector3 originalScale;
-    
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
     protected virtual void Awake()
     {
-        // Base awake logic
+        _photonView = GetComponent<PhotonView>();
     }
-    
+
     void Start()
     {
-        // Lưu scale gốc (Boss sẽ có scale lớn hơn)
         originalScale = transform.localScale;
-        
-        player = GameObject.FindWithTag("Player");
         enemyAnim = GetComponent<Animator>();
 
-        // Tìm PlayerHealth - NÓ LÀ GAMEOBJECT CON, không phải component!
-        if (player != null)
-        {
-            // Tìm GameObject con tên "PlayerHealth"
-            Transform playerHealthTransform = player.transform.Find("PlayerHealth");
-            if (playerHealthTransform != null)
-            {
-                playerHealth = playerHealthTransform.GetComponent<PlayerHealth>();
-                Debug.Log("Enemy found PlayerHealth on child GameObject!");
-            }
-            else
-            {
-                Debug.LogError("Cannot find PlayerHealth child GameObject!");
-            }
-        }
+        // Initial target: find nearest player via PlayerController.
+        // Works for any number of players (1-N).
+        RefreshTarget();
     }
 
-    // Update is called once per frame
+    // ─── Target helper ────────────────────────────────────────────────────────
+    /// <summary>Queries PlayerController for the nearest alive player and caches references.</summary>
+    protected void RefreshTarget()
+    {
+        if (PlayerController.Instance == null) return;
+
+        targetPlayer = PlayerController.Instance.GetNearestPlayer(transform.position);
+        if (targetPlayer != null)
+            playerHealth = targetPlayer.PlayerHealth;
+        else
+            playerHealth = null;
+    }
+
+    // ─── Update (MasterClient only) ───────────────────────────────────────────
     void Update()
     {
-        // Nếu Player chết rồi thì di chuyển tự do
+        // In multiplayer, only MasterClient runs enemy AI.
+        // Non-master clients receive enemy positions via PhotonTransformView.
+        if (_photonView != null && !PhotonNetwork.IsMasterClient) return;
+
+        // Re-acquire nearest target every frame (handles player deaths / new joins)
+        RefreshTarget();
+
+        // If the current target is dead, wander
         if (playerHealth != null && playerHealth.IsDead)
         {
             WanderAround();
@@ -64,7 +83,6 @@ public class Enemy : MonoBehaviour, IDamageable
         }
 
         ChasePlayer();
-
     }
 
     void LateUpdate()
@@ -74,30 +92,24 @@ public class Enemy : MonoBehaviour, IDamageable
 
     private void ChasePlayer()
     {
-        if (player == null) return;
+        if (targetPlayer == null) return;
 
-        Vector2 direction = (player.transform.position - transform.position).normalized;
-        if (direction.x < 0)
-        {
-            // Giữ scale gốc, chỉ đảo X axis
-            transform.localScale = new Vector3(-Mathf.Abs(originalScale.x), originalScale.y, originalScale.z);
-        }
-        else
-        {
-            // Giữ scale gốc
-            transform.localScale = new Vector3(Mathf.Abs(originalScale.x), originalScale.y, originalScale.z);
-        }
+        Vector3 targetPos = targetPlayer.RootTransform != null
+            ? targetPlayer.RootTransform.position
+            : targetPlayer.transform.position;
+
+        Vector2 direction = (targetPos - transform.position).normalized;
+        transform.localScale = direction.x < 0
+            ? new Vector3(-Mathf.Abs(originalScale.x), originalScale.y, originalScale.z)
+            : new Vector3( Mathf.Abs(originalScale.x), originalScale.y, originalScale.z);
+
         if (health <= 0)
         {
-            if (!isDead)
-            {
-                isDead = true;
-                Die();
-            }
+            if (!isDead) { isDead = true; Die(); }
         }
         else
         {
-            transform.position = Vector2.MoveTowards(transform.position, player.transform.position, speed * Time.deltaTime);
+            transform.position = Vector2.MoveTowards(transform.position, targetPos, speed * Time.deltaTime);
         }
     }
 
@@ -117,18 +129,41 @@ public class Enemy : MonoBehaviour, IDamageable
     {
         enemyAnim.SetBool("Dead", true);
         Invoke(nameof(SpawnExp), 0.8f);
-        Destroy(gameObject, 1.0f);
+
+        // Use PhotonNetwork.Destroy so the object is removed on all clients.
+        // Falls back to Destroy when offline.
+        if (_photonView != null)
+            PhotonNetwork.Destroy(gameObject);
+        else
+            Destroy(gameObject, 1.0f);
     }
 
-    private void SpawnExp()
+    protected virtual void SpawnExp()
     {
-        // Check nếu array rỗng
+        // Only MasterClient spawns EXP so it isn't duplicated on all clients.
+        if (_photonView != null && !PhotonNetwork.IsMasterClient) return;
+
+        // Prefer network prefab names (expPrefabNames) for multiplayer.
+        if (expPrefabNames != null && expPrefabNames.Length > 0)
+        {
+            string prefabName = expPrefabNames[Random.Range(0, expPrefabNames.Length)];
+            if (_photonView != null)
+                PhotonNetwork.Instantiate(prefabName, transform.position, transform.rotation);
+            else
+            {
+                // Offline: try to load from Resources
+                GameObject prefab = Resources.Load<GameObject>(prefabName);
+                if (prefab != null) Instantiate(prefab, transform.position, transform.rotation);
+            }
+            return;
+        }
+
+        // Legacy fallback: local expSpawn array (single-player only)
         if (expSpawn == null || expSpawn.Length == 0)
         {
             Debug.LogWarning($"{gameObject.name} has no EXP prefabs assigned!");
             return;
         }
-        
         int index = Random.Range(0, expSpawn.Length);
         Instantiate(expSpawn[index], transform.position, transform.rotation);
     }
@@ -167,55 +202,29 @@ public class Enemy : MonoBehaviour, IDamageable
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player"))
+        // Only MasterClient applies damage — prevents double-damage from all clients.
+        if (_photonView != null && !PhotonNetwork.IsMasterClient) return;
+
+        if (!collision.CompareTag("Player")) return;
+
+        if (Time.time - lastDamageTime < damageCooldown) return;
+        lastDamageTime = Time.time;
+
+        // Get PlayerHealth from the hit collider
+        PlayerHealth hitPlayerHealth = collision.GetComponent<PlayerHealth>();
+        if (hitPlayerHealth == null) hitPlayerHealth = collision.GetComponentInChildren<PlayerHealth>();
+        if (hitPlayerHealth == null) hitPlayerHealth = collision.GetComponentInParent<PlayerHealth>();
+
+        if (hitPlayerHealth != null && !hitPlayerHealth.IsDead)
         {
-            // Tìm PlayerHealth nếu chưa có
-            if (playerHealth == null && player != null)
-            {
-                Transform playerHealthTransform = player.transform.Find("PlayerHealth");
-                if (playerHealthTransform != null)
-                {
-                    playerHealth = playerHealthTransform.GetComponent<PlayerHealth>();
-                }
-            }
-
-            // Không tấn công nếu Player đã chết
-            if (playerHealth != null && playerHealth.IsDead)
-            {
-                Debug.Log("Enemy collision but Player is dead - skipping damage");
-                return;
-            }
-
-            if (playerHealth == null)
-            {
-                Debug.LogError("PlayerHealth is NULL in Enemy OnTriggerEnter2D!");
-                return;
-            }
-
-            if (Time.time - lastDamageTime < damageCooldown)
-            {
-                return;
-            }
-
-            lastDamageTime = Time.time;
-
-            // Tìm IDamageable trên GameObject Player hoặc các con của nó
-            IDamageable playerDamageable = collision.GetComponent<IDamageable>();
-            if (playerDamageable == null)
-                playerDamageable = collision.GetComponentInChildren<IDamageable>();
-
-            if (playerDamageable != null)
-            {
-                playerDamageable.TakeDamage(10); // Player mất 10 máu
-                Debug.Log("Enemy damaged Player!");
-            }
-
-            // Enemy cũng nhận damage
-            if (!isHit)
-            {
-                TakeDamage(1);
-            }
+            // RPC → all clients reduce HP simultaneously
+            hitPlayerHealth.SendTakeDamageRPC(GetDamageAmount());
+            Debug.Log($"Enemy damaged Player for {GetDamageAmount()}!");
         }
+
+        // Enemy also takes 1 damage on contact
+        if (!isHit)
+            TakeDamage(1);
     }
 
 

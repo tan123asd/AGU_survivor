@@ -1,3 +1,4 @@
+using Photon.Pun;
 using UnityEngine;
 
 /// <summary>
@@ -19,6 +20,10 @@ public class PlayerMovement2D : MonoBehaviour
     private Vector2 moveInput;
     private bool inputEnabled = true;
 
+    // ─── Photon ───────────────────────────────────────────────────────────────
+    // Null when offline (single-player). Non-null in multiplayer.
+    private PhotonView _photonView;
+
     // ─── Lifecycle ────────────────────────────────────────────────────────────
     private void Awake()
     {
@@ -37,10 +42,18 @@ public class PlayerMovement2D : MonoBehaviour
 
         if (playerHealth == null)
             Debug.LogWarning("[PlayerMovement2D] PlayerHealth not found! Movement won't stop when dead.");
+
+        // PhotonView lives on the root of the player prefab.
+        // GetComponentInParent also checks this object itself.
+        _photonView = GetComponentInParent<PhotonView>();
     }
 
     private void Update()
     {
+        // In multiplayer: only the owning client drives input.
+        // Remote players are moved by PhotonTransformView automatically.
+        if (_photonView != null && !_photonView.IsMine) return;
+
         // Stop completely when dead or input locked
         if (!inputEnabled || (playerHealth != null && playerHealth.IsDead))
             return;
@@ -57,6 +70,9 @@ public class PlayerMovement2D : MonoBehaviour
 
     private void FixedUpdate()
     {
+        // Remote player: physics driven by PhotonTransformView, do nothing here.
+        if (_photonView != null && !_photonView.IsMine) return;
+
         if (!inputEnabled || (playerHealth != null && playerHealth.IsDead))
         {
             if (rb != null) rb.linearVelocity = Vector2.zero;

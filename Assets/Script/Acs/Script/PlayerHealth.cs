@@ -1,3 +1,4 @@
+using Photon.Pun;
 using UnityEngine;
 
 /// <summary>
@@ -16,6 +17,9 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     private Animator animator;
     private float lastDamageTime = -999f;
     private float damageCooldown = 1.0f; // Cooldown giữa các lần nhận damage
+
+    // ─── Photon ───────────────────────────────────────────────────────────────
+    private PhotonView _photonView;
 
     public int MaxHealth => maxHealth;
 
@@ -39,14 +43,17 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         // Tìm Animator trên GameObject này, GameObject cha hoặc GameObject con
         animator = GetComponent<Animator>();
         if (animator == null)
-            animator = GetComponentInParent<Animator>(); // Tìm ở parent (Player)
+            animator = GetComponentInParent<Animator>();
         if (animator == null)
-            animator = GetComponentInChildren<Animator>(); // Tìm ở children
+            animator = GetComponentInChildren<Animator>();
         
         if (animator != null)
             Debug.Log("Found Animator successfully!");
         else
             Debug.LogError("ANIMATOR NOT FOUND! Player GameObject cần có Animator component!");
+
+        // PhotonView is on the root of the player prefab.
+        _photonView = GetComponentInParent<PhotonView>();
     }
 
     private void Start()
@@ -55,6 +62,11 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             healthBar.SetMaxHealth(maxHealth);
     }
 
+    /// <summary>
+    /// Called locally when offline, or via RPC in multiplayer.
+    /// In multiplayer, always call SendTakeDamageRPC() instead of this directly.
+    /// </summary>
+    [PunRPC]
     public void TakeDamage(int damage)
     {
         if (IsDead) return;
@@ -68,40 +80,49 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             Die();
     }
 
+    /// <summary>
+    /// Sends TakeDamage to all clients via RPC.
+    /// Falls back to a direct call when offline (no PhotonView).
+    /// Call this from enemy collision — never call TakeDamage() directly in multiplayer.
+    /// </summary>
+    public void SendTakeDamageRPC(int damage)
+    {
+        if (_photonView != null)
+            _photonView.RPC(nameof(TakeDamage), RpcTarget.All, damage);
+        else
+            TakeDamage(damage); // offline fallback
+    }
+
     public void Die()
     {
         Debug.Log("=== DIE() CALLED ===");
         
         currentHealth = 0;
-        Debug.Log("IsDead is now: " + IsDead);
         
         if (healthBar != null)
             healthBar.SetHealth(0);
 
-        // Trigger animation chết giống Enemy
+        // Trigger death animation
         if (animator != null)
-        {
-            Debug.Log("Triggering Die animation...");
             animator.SetTrigger("Die");
-            Debug.Log("Die trigger set successfully!");
-        }
         else
-        {
             Debug.LogError("Cannot trigger Die animation - Animator is NULL!");
-        }
 
         // Disable movement
-        PlayerMovement2D movement = GetComponent<PlayerMovement2D>();
+        PlayerMovement2D movement = GetComponentInParent<PlayerMovement2D>();
+        if (movement == null) movement = GetComponent<PlayerMovement2D>();
         if (movement != null)
             movement.enabled = false;
 
-        // Disable collider để không va chạm nữa
+        // Disable collider
         Collider2D col = GetComponent<Collider2D>();
         if (col != null)
             col.enabled = false;
 
-        // TODO: load scene end game sau 2 giây (làm sau)
-        // Invoke("LoadGameOverScene", 2f);
+        // Notify PlayerController so it can fire OnAllPlayersDied if needed
+        PlayerEntity entity = GetComponentInParent<PlayerEntity>();
+        if (entity != null && PlayerController.Instance != null)
+            PlayerController.Instance.NotifyPlayerDied(entity);
     }
 
     /// <summary>
@@ -123,11 +144,12 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             // Kiểm tra cooldown
             if (Time.time - lastDamageTime < damageCooldown)
                 return;
-            
+
             lastDamageTime = Time.time;
-            
-            // Nhận damage
-            TakeDamage(damageFromEnemy);
+
+            // Use RPC in multiplayer so all clients update HP simultaneously.
+            // Falls back to direct call when offline.
+            SendTakeDamageRPC(damageFromEnemy);
             Debug.Log("Player took damage from Enemy!");
         }
     }
