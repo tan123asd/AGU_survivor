@@ -54,14 +54,14 @@ public class TimeManager : MonoBehaviour
         remainingTime = Mathf.Max(0, TimeLimit - elapsedTime);
 
         // Kiểm tra hết time limit
-        if (GameManager.Instance != null && remainingTime <= 0 && !GameManager.Instance.IsBossPhase)
+        if (MapManager.Instance != null && remainingTime <= 0 && !MapManager.Instance.IsBossPhase)
         {
             OnTimeLimitReached?.Invoke();
             TriggerBossPhase();
         }
 
         // Nếu đang ở Boss Phase
-        if (GameManager.Instance != null && GameManager.Instance.IsBossPhase)
+        if (MapManager.Instance != null && MapManager.Instance.IsBossPhase)
         {
             HandleBossPhase();
         }
@@ -100,10 +100,10 @@ public class TimeManager : MonoBehaviour
         bossPhaseStartTime = Time.time;
         lastBossSpawnTime = Time.time;
         
-        // Gọi GameManager để bắt đầu Boss Phase
-        if (GameManager.Instance != null)
+        // Gọi MapManager để bắt đầu Boss Phase
+        if (MapManager.Instance != null)
         {
-            GameManager.Instance.StartBossPhase();
+            MapManager.Instance.StartBossPhase();
         }
     }
 
@@ -151,7 +151,7 @@ public class TimeManager : MonoBehaviour
         if (player != null && !player.IsDead)
         {
             int bonusGold = currentMapConfig != null ? currentMapConfig.completionBonus : 1000;
-            GameManager.Instance.CompleteGame(bonusGold);
+            MapManager.Instance.CompleteGame(bonusGold);
             StopTimer();
         }
     }
