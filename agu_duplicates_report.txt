@@ -1,0 +1,28 @@
+﻿2 | readme.txt
+  D:\Unity Projects\AGU test\AGU Project\AGU_survivor\Assets\Photon\PhotonUnityNetworking\readme.txt
+  D:\Unity Projects\AGU test\AGU Project\AGU_survivor\Assets\Travis Game Assets\Status Effects\Readme.txt
+
+2 | LICENSE.txt
+  D:\Unity Projects\AGU test\AGU Project\AGU_survivor\Assets\Photon\PhotonUnityNetworking\Code\Editor\ReordableList\LICENSE.txt
+  D:\Unity Projects\AGU test\AGU Project\AGU_survivor\Assets\Tanh\LICENSE.txt
+
+2 | GameManager.cs
+  D:\Unity Projects\AGU test\AGU Project\AGU_survivor\Assets\Photon\PhotonUnityNetworking\Demos\PunBasics-Tutorial\Scripts\GameManager.cs
+  D:\Unity Projects\AGU test\AGU Project\AGU_survivor\Assets\_Data\GameManager.cs
+
+2 | Photon3Unity3D.xml
+  D:\Unity Projects\AGU test\AGU Project\AGU_survivor\Assets\Photon\PhotonLibs\Photon3Unity3D.xml
+  D:\Unity Projects\AGU test\AGU Project\AGU_survivor\Assets\Photon\PhotonLibs\netstandard2.0\Photon3Unity3D.xml
+
+2 | Player.cs
+  D:\Unity Projects\AGU test\AGU Project\AGU_survivor\Assets\ChiTan\ScriptOfTan\Player.cs
+  D:\Unity Projects\AGU test\AGU Project\AGU_survivor\Assets\Photon\PhotonRealtime\Code\Player.cs
+
+2 | TextButtonTransition.cs
+  D:\Unity Projects\AGU test\AGU Project\AGU_survivor\Assets\Photon\PhotonChat\Demos\Demo Chat\Code\Utilities\TextButtonTransition.cs
+  D:\Unity Projects\AGU test\AGU Project\AGU_survivor\Assets\Photon\PhotonUnityNetworking\UtilityScripts\UI\TextButtonTransition.cs
+
+2 | TextToggleIsOnTransition.cs
+  D:\Unity Projects\AGU test\AGU Project\AGU_survivor\Assets\Photon\PhotonChat\Demos\Demo Chat\Code\Utilities\TextToggleIsOnTransition.cs
+  D:\Unity Projects\AGU test\AGU Project\AGU_survivor\Assets\Photon\PhotonUnityNetworking\UtilityScripts\UI\TextToggleIsOnTransition.cs
+
