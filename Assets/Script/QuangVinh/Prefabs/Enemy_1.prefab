@@ -176,4 +176,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: AGU_Scripts::Enemy
   speed: 2
   health: 3
+  expPrefabNames:
+  - Exp/Exp(Blue)
+  - Exp/Exp(RED)
   expSpawn: []

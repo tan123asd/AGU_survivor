@@ -1,3 +1,4 @@
+using Photon.Pun;
 using UnityEngine;
 
 /// <summary>
@@ -13,7 +14,8 @@ public class PlayerEntity : MonoBehaviour
     [Header("Player Components")]
     [SerializeField] private PlayerHealth playerHealth;
     [SerializeField] public PlayerMovement2D playerMovement;
-    [SerializeField] private ExperienceManager experienceManager;
+    // ExperienceManager is now a scene-level singleton (ExperienceManager.Instance).
+    // EXP collection is shared across all players via ExperienceManager.ShareExp().
 
     // ─── Properties ───────────────────────────────────────────────────────────
     public PlayerHealth PlayerHealth => playerHealth;
@@ -50,11 +52,6 @@ public class PlayerEntity : MonoBehaviour
         if (playerMovement == null)
             playerMovement = GetComponent<PlayerMovement2D>();
 
-        if (experienceManager == null)
-            experienceManager = GetComponent<ExperienceManager>();
-        if (experienceManager == null)
-            experienceManager = GetComponentInChildren<ExperienceManager>();
-
         // Register with the central manager
         if (PlayerController.Instance != null)
             PlayerController.Instance.RegisterPlayer(this);
@@ -83,19 +80,26 @@ public class PlayerEntity : MonoBehaviour
     }
 
     // ─── XP Orb Collection ────────────────────────────────────────────────────
+    // EXP is SHARED: ShareExp() broadcasts to all clients via RPC.
+    // Only the player who touches the orb destroys it and triggers the EXP gain.
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (experienceManager == null) return;
-
         if (collision.CompareTag("Exp1"))
         {
-            Destroy(collision.gameObject);
-            experienceManager.AddExp(100);
+            // Destroy orb on all clients if online, locally if offline
+            PhotonView orbView = collision.GetComponent<PhotonView>();
+            if (orbView != null) PhotonNetwork.Destroy(collision.gameObject);
+            else Destroy(collision.gameObject);
+
+            ExperienceManager.ShareExp(100); // broadcasts to ALL clients
         }
         else if (collision.CompareTag("Exp2"))
         {
-            Destroy(collision.gameObject);
-            experienceManager.AddExp(200);
+            PhotonView orbView = collision.GetComponent<PhotonView>();
+            if (orbView != null) PhotonNetwork.Destroy(collision.gameObject);
+            else Destroy(collision.gameObject);
+
+            ExperienceManager.ShareExp(200);
         }
     }
 }

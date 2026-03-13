@@ -1,11 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
+using Photon.Pun;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class ExperienceManager : MonoBehaviour
 {
+    // ─── Singleton ──────────────────────────────────
+    // Scene-level singleton: one ExperienceManager is shared by ALL players.
+    public static ExperienceManager Instance { get; private set; }
+
+    // ─── Photon ──────────────────────────────────
+    // Requires a PhotonView on the 'Exp bar' GameObject in the Unity Editor.
+    private PhotonView _photonView;
     [SerializeField] private AnimationCurve expCurve;
     [SerializeField] private UpgradeData[] upgradeDatas;
 
@@ -18,7 +26,39 @@ public class ExperienceManager : MonoBehaviour
     [SerializeField] private Slider expSlider;
     [SerializeField] private ParticleSystem levelUpEffect;
 
-    public void AddExp(int exp)
+    private void Awake()
+    {
+        Instance = this;
+        _photonView = GetComponent<PhotonView>();
+    }
+
+    // ─── Public API ──────────────────────────────────
+
+    /// <summary>
+    /// Call this from game code (e.g. PlayerEntity) instead of AddExpRPC directly.
+    /// In multiplayer, broadcasts to ALL clients so EXP is shared.
+    /// In single-player (no PhotonView), calls AddExpRPC locally.
+    /// </summary>
+    public static void ShareExp(int amount)
+    {
+        if (Instance == null)
+        {
+            Debug.LogWarning("[ExperienceManager] No Instance found in scene.");
+            return;
+        }
+
+        if (Instance._photonView != null)
+            Instance._photonView.RPC(nameof(AddExpRPC), RpcTarget.All, amount);
+        else
+            Instance.AddExpRPC(amount); // offline fallback
+    }
+
+    /// <summary>
+    /// Adds EXP locally. Called via RPC in multiplayer, or directly offline.
+    /// Do NOT call this directly from gameplay code — use ShareExp() instead.
+    /// </summary>
+    [PunRPC]
+    public void AddExpRPC(int exp)
     {
         currentExp += exp;
         CheckForLevelUp();
@@ -31,31 +71,37 @@ public class ExperienceManager : MonoBehaviour
         {
             currentLevel++;
             UpdateLevel();
-            GameObject player = GameObject.FindWithTag("Player");
-            if (levelUpEffect != null && player != null)
+
+            // Get the local player via PlayerController (multiplayer-safe)
+            PlayerEntity localPlayer = PlayerController.Instance != null
+                ? PlayerController.Instance.GetLocalPlayer()
+                : null;
+
+            if (levelUpEffect != null && localPlayer != null)
             {
-                ParticleSystem psInstance = Instantiate(levelUpEffect, player.transform.position + new Vector3(0, -0.5f, 0), Quaternion.identity);
-                psInstance.transform.SetParent(player.transform);
-                StartCoroutine(StopFollowingAndDestroy(psInstance.gameObject, psInstance.main.duration));
+                Vector3 spawnPos = localPlayer.RootTransform != null
+                    ? localPlayer.RootTransform.position + new Vector3(0, -0.5f, 0)
+                    : localPlayer.transform.position + new Vector3(0, -0.5f, 0);
+
+                ParticleSystem psInstance = Instantiate(levelUpEffect, spawnPos, Quaternion.identity);
+                psInstance.transform.SetParent(localPlayer.transform);
+
+                // CoroutineRunner: runs on the particle's own active GameObject.
+                // WaitForSecondsRealtime works even when timeScale = 0 (upgrade panel).
+                float duration = psInstance.main.duration;
+                CoroutineRunner.RunDelayed(psInstance.gameObject, duration, () =>
+                {
+                    if (psInstance != null)
+                    {
+                        psInstance.transform.SetParent(null);
+                        Destroy(psInstance.gameObject, psInstance.main.duration);
+                    }
+                });
             }
         }
     }
 
-    private IEnumerator StopFollowingAndDestroy(GameObject psObj, float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        if (psObj != null)
-        {
-            psObj.transform.SetParent(null);
-            ParticleSystem ps = psObj.GetComponent<ParticleSystem>();
-            if (ps != null)
-            {
-                Destroy(ps.gameObject, ps.main.duration);
-            }
 
-        }
-
-    }
 
     private void UpdateLevel()
     {

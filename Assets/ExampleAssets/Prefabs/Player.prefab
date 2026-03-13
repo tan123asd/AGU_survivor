@@ -29,7 +29,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1655735257735982259}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -3.05, y: 0.71, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -207,7 +207,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: AGU_Scripts::PlayerEntity
   playerHealth: {fileID: 1624471362956003550}
   playerMovement: {fileID: 5283678445480011004}
-  experienceManager: {fileID: 0}
+  experienceManager: {fileID: 3809188548891456837, guid: 277aea41e72ac1f44bc378e12d618f29, type: 3}
 --- !u!1 &5110824307924145192
 GameObject:
   m_ObjectHideFlags: 0
