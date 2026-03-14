@@ -6,11 +6,11 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/1_PhotonRoom.unity
-    guid: 9fc0d4010bbf28b4594072e72b8655ab
+    path: Assets/Scenes/QuangVinh/GameStart.unity
+    guid: 8951d7a0fb1c9de4f93cca96001c3571
   - enabled: 1
-    path: Assets/Scenes/PlayerControllerScene.unity
-    guid: b2088fa7eeb3ae740b302d5a27c3c17b
+    path: Assets/Scenes/CHITAN!.unity
+    guid: 0793559a29d207640aa887d668aadef3
   m_configObjects:
     com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
