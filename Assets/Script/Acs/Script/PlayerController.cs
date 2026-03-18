@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Singleton manager that tracks ALL active PlayerEntity instances.
@@ -53,6 +54,21 @@ public class PlayerController : MonoBehaviour
         }
         _instance = this;
         DontDestroyOnLoad(gameObject);
+    }
+
+    private void OnEnable()  => SceneManager.sceneLoaded += OnSceneLoaded;
+    private void OnDisable() => SceneManager.sceneLoaded -= OnSceneLoaded;
+
+    /// <summary>
+    /// Clears the player list on scene load so stale references
+    /// from a previous session don't linger (e.g. after returning to lobby).
+    /// PlayerEntity.Awake() re-registers each player in the new scene.
+    /// </summary>
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        _players.Clear();
+        if (showDebugLogs)
+            Debug.Log($"[PlayerController] Scene loaded '{scene.name}' → player list cleared.");
     }
 
     // ─── Registration ─────────────────────────────────────────────────────────
@@ -119,12 +135,11 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public PlayerEntity GetLocalPlayer()
     {
+        // Multiplayer: return the player owned by THIS client (PhotonView.IsMine).
+        // Single-player: IsLocalPlayer is always true, so first registered wins.
         foreach (PlayerEntity p in _players)
-        {
-            if (p != null && p.PlayerIndex == 0)
-                return p;
-        }
-        // Fallback: return first available
+            if (p != null && p.IsLocalPlayer) return p;
+        // Fallback: first alive player (should not reach here in normal flow)
         return _players.Count > 0 ? _players[0] : null;
     }
 

@@ -15,6 +15,8 @@ GameObject:
   - component: {fileID: 8169354815869006481}
   - component: {fileID: 3585413101811356096}
   - component: {fileID: 4417919631621311381}
+  - component: {fileID: 5346991430043277223}
+  - component: {fileID: 8662160795513864278}
   m_Layer: 0
   m_Name: NetworkPlayer
   m_TagString: Player
@@ -31,7 +33,7 @@ Transform:
   m_GameObject: {fileID: 1655735257735982259}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -3.05, y: 0.71, z: -1}
+  m_LocalPosition: {x: 0, y: 0, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -214,6 +216,7 @@ MonoBehaviour:
   observableSearch: 2
   ObservedComponents:
   - {fileID: 4417919631621311381}
+  - {fileID: 8662160795513864278}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -233,6 +236,44 @@ MonoBehaviour:
   m_SynchronizeRotation: 1
   m_SynchronizeScale: 0
   m_UseLocal: 1
+--- !u!114 &5346991430043277223
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1655735257735982259}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4354cf6389c81e647b8ceacbccd7c452, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: AGU_Scripts::PlayerEntity
+  playerHealth: {fileID: 8153975868991823243}
+  playerMovement: {fileID: 3329348564633790039}
+--- !u!114 &8662160795513864278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1655735257735982259}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b8c4a61274f60b4ea5fb4299cfdbf14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PhotonUnityNetworking::Photon.Pun.PhotonAnimatorView
+  ShowLayerWeightsInspector: 1
+  ShowParameterInspector: 1
+  m_SynchronizeParameters:
+  - Type: 4
+    SynchronizeType: 0
+    Name: isRuning
+  - Type: 9
+    SynchronizeType: 0
+    Name: Die
+  m_SynchronizeLayers:
+  - SynchronizeType: 0
+    LayerIndex: 0
 --- !u!1 &5110824307924145192
 GameObject:
   m_ObjectHideFlags: 0

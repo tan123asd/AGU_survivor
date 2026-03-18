@@ -7,10 +7,17 @@ public class PhotonLogin : MonoBehaviourPunCallbacks
     public TMP_InputField inputUsername;
     public string nickName;
 
+    [Header("UI Panels")]
+    public GameObject step2Login;
+    public GameObject step3Room;
+
     void Start()
     {
         this.nickName = "Sai";
         this.inputUsername.text = this.nickName;
+
+        if (step2Login) step2Login.SetActive(true);
+        if (step3Room) step3Room.SetActive(false);
     }
 
     public virtual void OnChangeName()
@@ -40,5 +47,7 @@ public class PhotonLogin : MonoBehaviourPunCallbacks
     public override void OnJoinedLobby()
     {
         Debug.Log("OnJoinedLobby");
+        if (step2Login) step2Login.SetActive(false);
+        if (step3Room) step3Room.SetActive(true);
     }
 }

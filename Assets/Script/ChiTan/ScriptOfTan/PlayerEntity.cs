@@ -1,5 +1,6 @@
 using Photon.Pun;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Root component for a Player GameObject.
@@ -17,9 +18,19 @@ public class PlayerEntity : MonoBehaviour
     // ExperienceManager is now a scene-level singleton (ExperienceManager.Instance).
     // EXP collection is shared across all players via ExperienceManager.ShareExp().
 
+    // ─── Photon ───────────────────────────────────────────────────────────────
+    private PhotonView _photonView;
+
     // ─── Properties ───────────────────────────────────────────────────────────
     public PlayerHealth PlayerHealth => playerHealth;
     public PlayerMovement2D PlayerMovement => playerMovement;
+
+    /// <summary>
+    /// True for the player owned by THIS client.
+    /// In single-player (no PhotonView), always true.
+    /// In multiplayer, true only on the owning client.
+    /// </summary>
+    public bool IsLocalPlayer => _photonView == null || _photonView.IsMine;
 
     /// <summary>
     /// Index assigned by PlayerSpawner / NetworkPlayerSpawner.
@@ -40,6 +51,9 @@ public class PlayerEntity : MonoBehaviour
     {
         // Default RootTransform to this object; PlayerSpawner will override if needed
         RootTransform = transform;
+
+        // PhotonView on the root of the network player prefab
+        _photonView = GetComponentInParent<PhotonView>();
 
         // Auto-find components if not assigned in Inspector
         if (playerHealth == null)

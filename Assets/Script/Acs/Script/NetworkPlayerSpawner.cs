@@ -223,6 +223,15 @@ public class NetworkPlayerSpawner : MonoBehaviourPunCallbacks
             Debug.Log($"[NetworkPlayerSpawner] Player left room: {otherPlayer.NickName}");
     }
 
+    public override void OnMasterClientSwitched(Player newMasterClient)
+    {
+        // Enemy AI automatically transfers: Enemy.Update() checks
+        // PhotonNetwork.IsMasterClient every frame, so the new master
+        // immediately takes control of all enemy movement.
+        if (showDebugLogs)
+            Debug.Log($"[NetworkPlayerSpawner] MasterClient switched to: {newMasterClient.NickName}. Enemy AI transferred automatically.");
+    }
+
     public override void OnLeftRoom()
     {
         // Clean up local player when we leave

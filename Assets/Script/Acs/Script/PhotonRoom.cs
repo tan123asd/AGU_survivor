@@ -15,6 +15,10 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
     public List<RoomInfo> updatedRooms;
     public List<RoomProfile> rooms = new List<RoomProfile>();
 
+    [Header("UI Panels")]
+    public GameObject step3Room;
+    public GameObject step4Game;
+
     protected void Awake()
     {
         PhotonRoom.instance = this;//Dont do this in your game
@@ -23,6 +27,7 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
     protected void Start()
     {
         this.input.text = "Room1";
+        if (step4Game) step4Game.SetActive(false);
     }
 
     public virtual void Create()
@@ -73,12 +78,19 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         Debug.Log(transform.name + ": OnJoinedRoom");
+        
+        if (step3Room) step3Room.SetActive(false);
+        if (step4Game) step4Game.SetActive(true);
+
         if(this.autoStartGame) this.StartGame();
     }
 
     public override void OnLeftRoom()
     {
         Debug.Log(transform.name + ": OnLeftRoom");
+
+        if (step3Room) step3Room.SetActive(true);
+        if (step4Game) step4Game.SetActive(false);
     }
 
     public override void OnCreateRoomFailed(short returnCode, string message)
