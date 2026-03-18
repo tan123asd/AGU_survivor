@@ -18,7 +18,7 @@ public class PlayerController : MonoBehaviour
         {
             if (_instance == null)
             {
-                _instance = FindObjectOfType<PlayerController>();
+                _instance = FindFirstObjectByType<PlayerController>();
                 if (_instance == null)
                 {
                     GameObject go = new GameObject("PlayerController (Auto-Created)");
@@ -56,7 +56,7 @@ public class PlayerController : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    private void OnEnable()  => SceneManager.sceneLoaded += OnSceneLoaded;
+    private void OnEnable() => SceneManager.sceneLoaded += OnSceneLoaded;
     private void OnDisable() => SceneManager.sceneLoaded -= OnSceneLoaded;
 
     /// <summary>

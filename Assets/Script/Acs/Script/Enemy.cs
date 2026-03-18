@@ -140,32 +140,37 @@ public class Enemy : MonoBehaviour, IDamageable
 
     protected virtual void SpawnExp()
     {
-        // Only MasterClient spawns EXP so it isn't duplicated on all clients.
-        if (_photonView != null && !PhotonNetwork.IsMasterClient) return;
+        if (!PhotonNetwork.IsMasterClient) return;  // Chỉ Master spawn
 
-        // Prefer network prefab names (expPrefabNames) for multiplayer.
-        if (expPrefabNames != null && expPrefabNames.Length > 0)
+        if (expPrefabNames == null || expPrefabNames.Length == 0)
         {
-            string prefabName = expPrefabNames[Random.Range(0, expPrefabNames.Length)];
-            if (_photonView != null)
-                PhotonNetwork.Instantiate(prefabName, transform.position, transform.rotation);
-            else
-            {
-                // Offline: try to load from Resources
-                GameObject prefab = Resources.Load<GameObject>(prefabName);
-                if (prefab != null) Instantiate(prefab, transform.position, transform.rotation);
-            }
+            Debug.LogWarning($"{gameObject.name} has no expPrefabNames!");
             return;
         }
 
-        // Legacy fallback: local expSpawn array (single-player only)
-        if (expSpawn == null || expSpawn.Length == 0)
+        string prefabName = expPrefabNames[Random.Range(0, expPrefabNames.Length)];
+
+        // Debug để kiểm tra
+        Debug.Log($"[Master] Spawning network EXP: {prefabName} at {transform.position}");
+
+        // Dùng InstantiateRoomObject cho EXP orb (room-owned)
+        GameObject spawned = PhotonNetwork.InstantiateRoomObject(prefabName, transform.position, Quaternion.identity);
+
+        if (spawned == null)
         {
-            Debug.LogWarning($"{gameObject.name} has no EXP prefabs assigned!");
+            Debug.LogError($"Spawn failed for {prefabName}! Check Resources/ folder and prefab name.");
             return;
         }
-        int index = Random.Range(0, expSpawn.Length);
-        Instantiate(expSpawn[index], transform.position, transform.rotation);
+
+        PhotonView pv = spawned.GetComponent<PhotonView>();
+        if (pv != null)
+        {
+            Debug.Log($"[Spawn OK] EXP ViewID: {pv.ViewID} (should > 0)");
+        }
+        else
+        {
+            Debug.LogError("Spawned EXP but NO PhotonView! Add PhotonView to prefab root.");
+        }
     }
 
     private void WanderAround()
