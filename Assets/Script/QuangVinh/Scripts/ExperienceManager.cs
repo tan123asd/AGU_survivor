@@ -207,8 +207,18 @@ public class ExperienceManager : MonoBehaviour
             validUpgrades = availableUpgrades;
         }
 
-        // Random chọn
-        for(int i = 0; i < count && validUpgrades.Count > 0; i++)
+        // Random chọn, ưu tiên luôn có ít nhất 1 Stat nếu có trong danh sách hợp lệ
+        List<UpgradeData> statUpgrades = validUpgrades.FindAll(u => u.upgradeType == UpgradeData.UpgradeType.Stat);
+        if (count > 0 && statUpgrades.Count > 0)
+        {
+            int statIndex = Random.Range(0, statUpgrades.Count);
+            UpgradeData guaranteedStat = statUpgrades[statIndex];
+            selectedUpgrades.Add(guaranteedStat);
+            validUpgrades.Remove(guaranteedStat);
+        }
+
+        // Fill phần còn lại ngẫu nhiên không trùng
+        while (selectedUpgrades.Count < count && validUpgrades.Count > 0)
         {
             int randomIndex = Random.Range(0, validUpgrades.Count);
             selectedUpgrades.Add(validUpgrades[randomIndex]);

@@ -1093,7 +1093,7 @@ MonoBehaviour:
   - {fileID: 7441429887425416535, guid: e8764f62164f5674d96ddfb8cd8a7fea, type: 3}
   - {fileID: 7441429887425416535, guid: 4a6546a9f6f40934aa0274be07ceb9f0, type: 3}
   mainCamera: {fileID: 519420031}
-  bossPrefab: {fileID: 7441429887425416535, guid: 28dcf5d33f70a334d9fbca1d7bc5414c, type: 3}
+  bossPrefab: {fileID: 0}
   mapConfig: {fileID: 0}
 --- !u!4 &631587360
 Transform:
@@ -6460,18 +6460,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Exp bar
       objectReference: {fileID: 0}
-    - target: {fileID: 3809188548891456837, guid: 277aea41e72ac1f44bc378e12d618f29, type: 3}
-      propertyPath: upgradeDatas.Array.size
-      value: 6
-      objectReference: {fileID: 0}
-    - target: {fileID: 3809188548891456837, guid: 277aea41e72ac1f44bc378e12d618f29, type: 3}
-      propertyPath: 'upgradeDatas.Array.data[4]'
-      value: 
-      objectReference: {fileID: 11400000, guid: 46bd4ebc8bdebfc44b944f42b235cf1f, type: 2}
-    - target: {fileID: 3809188548891456837, guid: 277aea41e72ac1f44bc378e12d618f29, type: 3}
-      propertyPath: 'upgradeDatas.Array.data[5]'
-      value: 
-      objectReference: {fileID: 11400000, guid: aceba176dd764144685d05823c8c6cde, type: 2}
     - target: {fileID: 4545075028065875324, guid: 277aea41e72ac1f44bc378e12d618f29, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

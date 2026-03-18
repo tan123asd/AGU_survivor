@@ -128,18 +128,32 @@ public class PhotonRoom : MonoBehaviourPunCallbacks
 
     protected virtual void UpdateRoomProfileUI()
     {
+        if (this.roomContent == null)
+        {
+            Debug.LogError("[PhotonRoom] roomContent is null. Assign Room Content Transform in Inspector.");
+            return;
+        }
+
+        if (this.roomPrefab == null)
+        {
+            Debug.LogError("[PhotonRoom] roomPrefab is null. Assign UIRoomProfile prefab in Inspector.");
+            return;
+        }
+
         this.ClearRoomProfileUI();
 
         foreach (RoomProfile roomProfile in this.rooms)
         {
             UIRoomProfile uiRoomProfile = Instantiate(this.roomPrefab);
             uiRoomProfile.SetRoomProfile(roomProfile);
-            uiRoomProfile.transform.SetParent(this.roomContent);
+            uiRoomProfile.transform.SetParent(this.roomContent, false);
         }
     }
 
     protected virtual void ClearRoomProfileUI()
     {
+        if (this.roomContent == null) return;
+
         foreach (Transform child in this.roomContent)
         {
             Destroy(child.gameObject);
