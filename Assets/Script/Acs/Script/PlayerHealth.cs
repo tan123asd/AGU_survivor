@@ -66,7 +66,6 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     /// Called locally when offline, or via RPC in multiplayer.
     /// In multiplayer, always call SendTakeDamageRPC() instead of this directly.
     /// </summary>
-    [PunRPC]
     public void TakeDamage(int damage)
     {
         if (IsDead) return;
@@ -88,7 +87,12 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     public void SendTakeDamageRPC(int damage)
     {
         if (_photonView != null)
-            _photonView.RPC(nameof(TakeDamage), RpcTarget.All, damage);
+        {
+            // RPCs are dispatched to components on the same GameObject as the PhotonView.
+            // Our PlayerHealth may be on a child object, so call a wrapper RPC on the root
+            // (PlayerEntity.TakeDamageRPC) which will route the damage to the child component.
+            _photonView.RPC("TakeDamageRPC", RpcTarget.All, damage);
+        }
         else
             TakeDamage(damage); // offline fallback
     }
