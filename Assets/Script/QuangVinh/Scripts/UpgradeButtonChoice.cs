@@ -10,6 +10,21 @@ public class UpgradeButtonChoice : MonoBehaviour
 
     private UpgradeData upgradeOption;
 
+    private WeaponController ResolveLocalWeaponController()
+    {
+        if (PlayerController.Instance == null) return null;
+
+        PlayerEntity localPlayer = PlayerController.Instance.GetLocalPlayer();
+        if (localPlayer == null) return null;
+
+        Transform root = localPlayer.RootTransform != null ? localPlayer.RootTransform : localPlayer.transform;
+        WeaponController wc = root.GetComponentInChildren<WeaponController>(true);
+        if (wc == null)
+            wc = localPlayer.GetComponentInChildren<WeaponController>(true);
+
+        return wc;
+    }
+
     private void Awake()
     {
 
@@ -31,17 +46,13 @@ public class UpgradeButtonChoice : MonoBehaviour
         if (upgradeData.upgradeType == UpgradeData.UpgradeType.Weapon 
             && upgradeData.weaponMode == UpgradeData.WeaponUpgradeMode.Upgrade)
         {
-            GameObject player = GameObject.FindGameObjectWithTag("Player");
-            if (player != null)
+            WeaponController weaponController = ResolveLocalWeaponController();
+            if (weaponController != null)
             {
-                WeaponController weaponController = player.GetComponentInChildren<WeaponController>();
-                if (weaponController != null)
+                Weapon weapon = weaponController.GetWeapon(upgradeData.GetTargetWeaponName());
+                if (weapon != null)
                 {
-                    Weapon weapon = weaponController.GetWeapon(upgradeData.GetTargetWeaponName());
-                    if (weapon != null)
-                    {
-                        currentWeaponLevel = weapon.WeaponLevel;
-                    }
+                    currentWeaponLevel = weapon.WeaponLevel;
                 }
             }
         }

@@ -205,31 +205,57 @@ public class Enemy : MonoBehaviour, IDamageable
         return 10; // Damage mặc định
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    protected virtual bool ShouldProcessContactOnThisClient()
     {
         // Only MasterClient applies damage — prevents double-damage from all clients.
-        if (_photonView != null && !PhotonNetwork.IsMasterClient) return;
+        return _photonView == null || PhotonNetwork.IsMasterClient;
+    }
 
-        if (!collision.CompareTag("Player")) return;
+    protected virtual bool CanDealContactDamage(Collider2D collision)
+    {
+        if (!collision.CompareTag("Player")) return false;
 
-        if (Time.time - lastDamageTime < damageCooldown) return;
+        if (Time.time - lastDamageTime < damageCooldown) return false;
         lastDamageTime = Time.time;
 
+        return true;
+    }
+
+    protected virtual PlayerHealth ResolveHitPlayerHealth(Collider2D collision)
+    {
         // Get PlayerHealth from the hit collider
         PlayerHealth hitPlayerHealth = collision.GetComponent<PlayerHealth>();
         if (hitPlayerHealth == null) hitPlayerHealth = collision.GetComponentInChildren<PlayerHealth>();
         if (hitPlayerHealth == null) hitPlayerHealth = collision.GetComponentInParent<PlayerHealth>();
+        return hitPlayerHealth;
+    }
 
+    protected virtual void DealContactDamage(PlayerHealth hitPlayerHealth)
+    {
         if (hitPlayerHealth != null && !hitPlayerHealth.IsDead)
         {
             // RPC → all clients reduce HP simultaneously
             hitPlayerHealth.SendTakeDamageRPC(GetDamageAmount());
             Debug.Log($"Enemy damaged Player for {GetDamageAmount()}!");
         }
+    }
 
+    protected virtual void OnPostContactWithPlayer(Collider2D collision)
+    {
         // Enemy also takes 1 damage on contact
         if (!isHit)
             TakeDamage(1);
+    }
+
+    protected virtual void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (!ShouldProcessContactOnThisClient()) return;
+
+        if (!CanDealContactDamage(collision)) return;
+
+        PlayerHealth hitPlayerHealth = ResolveHitPlayerHealth(collision);
+        DealContactDamage(hitPlayerHealth);
+        OnPostContactWithPlayer(collision);
     }
 
 

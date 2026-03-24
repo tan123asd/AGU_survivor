@@ -72,14 +72,21 @@ public class BossEnemy : Enemy
         return 10 * bossDamageMultiplier; // 30 damage thay vì 10
     }
 
-    // Override OnTriggerEnter2D to deal boss damage via RPC
-    private void OnTriggerEnter2D(Collider2D collision)
+    protected override bool ShouldProcessContactOnThisClient()
     {
-        // Only MasterClient applies damage
-        if (PhotonNetwork.IsMasterClient == false && PhotonNetwork.IsConnected) return;
+        // Match existing boss behavior: process contact when offline,
+        // and only on MasterClient when online.
+        return !PhotonNetwork.IsConnected || PhotonNetwork.IsMasterClient;
+    }
 
-        if (!collision.CompareTag("Player")) return;
+    protected override bool CanDealContactDamage(Collider2D collision)
+    {
+        // Keep previous boss behavior: no local cooldown gate here.
+        return collision.CompareTag("Player");
+    }
 
+    protected override PlayerHealth ResolveHitPlayerHealth(Collider2D collision)
+    {
         PlayerHealth hitHealth = collision.GetComponent<PlayerHealth>();
         if (hitHealth == null) hitHealth = collision.GetComponentInParent<PlayerHealth>();
         if (hitHealth == null)
@@ -88,11 +95,21 @@ public class BossEnemy : Enemy
             if (t != null) hitHealth = t.GetComponent<PlayerHealth>();
         }
 
+        return hitHealth;
+    }
+
+    protected override void DealContactDamage(PlayerHealth hitHealth)
+    {
         if (hitHealth != null && !hitHealth.IsDead)
         {
             // Use RPC so all clients apply boss damage
             hitHealth.SendTakeDamageRPC(GetDamageAmount());
             Debug.Log($"Boss hit Player for {GetDamageAmount()} damage!");
         }
+    }
+
+    protected override void OnPostContactWithPlayer(Collider2D collision)
+    {
+        // Keep previous boss behavior: no self-damage on contact.
     }
 }

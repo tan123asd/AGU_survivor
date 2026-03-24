@@ -466,5 +466,6 @@ MonoBehaviour:
   baseAttackInterval: 3
   baseRange: 10
   debugMode: 1
+  enemyQueryBufferSize: 64
   projectilePrefab: {fileID: 7174401495918054263, guid: 217029eb9f5e3d642807772dc382893d, type: 3}
   firePoint: {fileID: 0}

@@ -26,6 +26,21 @@ public class ExperienceManager : MonoBehaviour
     [SerializeField] private Slider expSlider;
     [SerializeField] private ParticleSystem levelUpEffect;
 
+    private WeaponController ResolveLocalWeaponController()
+    {
+        if (PlayerController.Instance == null) return null;
+
+        PlayerEntity localPlayer = PlayerController.Instance.GetLocalPlayer();
+        if (localPlayer == null) return null;
+
+        Transform root = localPlayer.RootTransform != null ? localPlayer.RootTransform : localPlayer.transform;
+        WeaponController wc = root.GetComponentInChildren<WeaponController>(true);
+        if (wc == null)
+            wc = localPlayer.GetComponentInChildren<WeaponController>(true);
+
+        return wc;
+    }
+
     private void Awake()
     {
         Instance = this;
@@ -117,25 +132,11 @@ public class ExperienceManager : MonoBehaviour
     {
         List<UpgradeData> availableUpgrades = new List<UpgradeData>(upgradeDatas);
         List<UpgradeData> selectedUpgrades = new List<UpgradeData>();
-        
-        // Tìm WeaponController để kiểm tra weapon đã có
-        WeaponController weaponController = GetComponent<WeaponController>();
+
+        // Use local player context in multiplayer; avoid global scene lookups.
+        WeaponController weaponController = ResolveLocalWeaponController();
         if (weaponController == null)
-        {
-            GameObject player = GameObject.FindGameObjectWithTag("Player");
-            if (player != null)
-            {
-                // Tìm trong Player và con của nó
-                weaponController = player.GetComponentInChildren<WeaponController>();
-            }
-        }
-        
-        // Fallback: Tìm trong toàn scene
-        if (weaponController == null)
-        {
-            weaponController = FindFirstObjectByType<WeaponController>();
-            Debug.LogWarning($"⚠️ WeaponController not on Player! Found at: {(weaponController != null ? weaponController.gameObject.name : "NULL")}");
-        }
+            Debug.LogWarning("⚠️ Local WeaponController not found! Weapon upgrade options may be limited.");
         
         // Lọc upgrades hợp lệ
         List<UpgradeData> validUpgrades = new List<UpgradeData>();
@@ -188,6 +189,25 @@ public class ExperienceManager : MonoBehaviour
                     else
                     {
                         Debug.LogWarning($"⚠️ WeaponController is NULL! Cannot check weapon upgrade.");
+                    }
+                }
+                else if (upgrade.weaponMode == UpgradeData.WeaponUpgradeMode.Fusion)
+                {
+                    if (weaponController == null)
+                    {
+                        Debug.LogWarning("⚠️ WeaponController is NULL! Cannot check fusion upgrade.");
+                        continue;
+                    }
+
+                    string fusionResultId = upgrade.GetTargetWeaponName();
+                    bool alreadyHasResult = weaponController.HasWeapon(fusionResultId);
+                    bool canFuse = upgrade.CanApplyFusion(weaponController);
+
+                    Debug.Log($"🧬 Checking fusion '{upgrade.displayName}': canFuse={canFuse}, alreadyHasResult={alreadyHasResult}");
+
+                    if (canFuse && !alreadyHasResult)
+                    {
+                        validUpgrades.Add(upgrade);
                     }
                 }
             }

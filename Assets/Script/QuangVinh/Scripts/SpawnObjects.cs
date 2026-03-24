@@ -31,11 +31,36 @@ public class SpawnObjects : MonoBehaviour
     private int currentChestCount;
     private int currentDestructiveCount;
 
-    void Start()
+    private bool TryResolvePlayerTransform()
     {
+        if (playerTransform != null) return true;
+
+        if (PlayerController.Instance != null)
+        {
+            PlayerEntity localPlayer = PlayerController.Instance.GetLocalPlayer();
+            if (localPlayer != null)
+            {
+                playerTransform = localPlayer.RootTransform != null
+                    ? localPlayer.RootTransform
+                    : localPlayer.transform;
+                return true;
+            }
+        }
+
+        // Backward-compatible fallback for scenes without PlayerController setup.
         GameObject player = GameObject.FindWithTag("Player");
         if (player != null)
+        {
             playerTransform = player.transform;
+            return true;
+        }
+
+        return false;
+    }
+
+    void Start()
+    {
+        TryResolvePlayerTransform();
 
         StartCoroutine(SpawnLoop());
     }
@@ -46,7 +71,7 @@ public class SpawnObjects : MonoBehaviour
         {
             yield return new WaitForSeconds(spawnInterval);
 
-            if (playerTransform == null) continue;
+            if (!TryResolvePlayerTransform()) continue;
 
             // Spawn chests
             for (int i = 0; i < chestsPerWave; i++)

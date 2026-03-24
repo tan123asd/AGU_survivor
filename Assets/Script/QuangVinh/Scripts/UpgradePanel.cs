@@ -8,6 +8,21 @@ public class UpgradePanel : MonoBehaviour
 
     private List<UpgradeButtonChoice> currentButtons = new List<UpgradeButtonChoice>();
 
+    private WeaponController ResolveLocalWeaponController()
+    {
+        if (PlayerController.Instance == null) return null;
+
+        PlayerEntity localPlayer = PlayerController.Instance.GetLocalPlayer();
+        if (localPlayer == null) return null;
+
+        Transform root = localPlayer.RootTransform != null ? localPlayer.RootTransform : localPlayer.transform;
+        WeaponController wc = root.GetComponentInChildren<WeaponController>(true);
+        if (wc == null)
+            wc = localPlayer.GetComponentInChildren<WeaponController>(true);
+
+        return wc;
+    }
+
     private void Awake()
     {
         instance = this;
@@ -49,6 +64,10 @@ public class UpgradePanel : MonoBehaviour
                 // Upgrade weapon hiện có (lấy từ WeaponData hoặc manual config)
                 UpgradePlayerWeapon(upgradeData.GetTargetWeaponName());
             }
+            else if (upgradeData.weaponMode == UpgradeData.WeaponUpgradeMode.Fusion)
+            {
+                ApplyFusionUpgrade(upgradeData);
+            }
         }
         else if (upgradeData.upgradeType == UpgradeData.UpgradeType.Stat)
         {
@@ -82,32 +101,19 @@ public class UpgradePanel : MonoBehaviour
             Debug.LogError("Weapon prefab is null!");
             return;
         }
-        
-        // Tìm player
-        GameObject player = GameObject.FindWithTag("Player");
-        if (player == null)
+
+        WeaponController weaponController = ResolveLocalWeaponController();
+        if (weaponController == null)
         {
-            Debug.LogError("Player not found!");
+            Debug.LogError("Local WeaponController not found! Cannot add weapon.");
             return;
         }
-        
-        // Tìm WeaponController trên player
-        WeaponController weaponController = player.GetComponentInChildren<WeaponController>();
-        
-        if (weaponController != null)
+
+        // Dùng WeaponController
+        bool success = weaponController.AddWeapon(weaponPrefab);
+        if (success)
         {
-            // Dùng WeaponController
-            bool success = weaponController.AddWeapon(weaponPrefab);
-            if (success)
-            {
-                Debug.Log($"✅ Added weapon via WeaponController: {weaponPrefab.name}");
-            }
-        }
-        else
-        {
-            // Fallback: Instantiate trực tiếp
-            GameObject weaponObj = Instantiate(weaponPrefab, player.transform);
-            Debug.Log($"⚠️ Added weapon directly to Player (no WeaponController): {weaponObj.name}");
+            Debug.Log($"✅ Added weapon via WeaponController: {weaponPrefab.name}");
         }
     }
     
@@ -122,20 +128,12 @@ public class UpgradePanel : MonoBehaviour
             return;
         }
         
-        // Tìm player
-        GameObject player = GameObject.FindWithTag("Player");
-        if (player == null)
-        {
-            Debug.LogError("Player not found!");
-            return;
-        }
-        
-        // Tìm WeaponController
-        WeaponController weaponController = player.GetComponentInChildren<WeaponController>();
+        // Tìm WeaponController local player
+        WeaponController weaponController = ResolveLocalWeaponController();
         
         if (weaponController == null)
         {
-            Debug.LogError("WeaponController not found! Cannot upgrade weapon.");
+            Debug.LogError("Local WeaponController not found! Cannot upgrade weapon.");
             return;
         }
         
@@ -149,5 +147,48 @@ public class UpgradePanel : MonoBehaviour
         {
             Debug.LogWarning($"Failed to upgrade weapon: {weaponName}");
         }
+    }
+
+    private void ApplyFusionUpgrade(UpgradeData upgradeData)
+    {
+        WeaponController weaponController = ResolveLocalWeaponController();
+        if (weaponController == null)
+        {
+            Debug.LogError("Local WeaponController not found! Cannot apply fusion upgrade.");
+            return;
+        }
+
+        if (!upgradeData.CanApplyFusion(weaponController))
+        {
+            Debug.LogWarning($"Fusion requirements are not met: {upgradeData.GetDisplayName()}");
+            return;
+        }
+
+        string sourceA = upgradeData.GetFusionSourceWeaponA();
+        string sourceB = upgradeData.GetFusionSourceWeaponB();
+
+        bool removedA = weaponController.RemoveWeapon(sourceA);
+        bool removedB = weaponController.RemoveWeapon(sourceB);
+        if (!removedA || !removedB)
+        {
+            Debug.LogWarning($"Fusion failed while removing source weapons: {sourceA}, {sourceB}");
+            return;
+        }
+
+        GameObject fusedPrefab = upgradeData.GetWeaponPrefab();
+        if (fusedPrefab == null)
+        {
+            Debug.LogError("Fusion weapon prefab is null!");
+            return;
+        }
+
+        bool addSuccess = weaponController.AddWeapon(fusedPrefab);
+        if (!addSuccess)
+        {
+            Debug.LogError($"Failed to add fused weapon prefab: {fusedPrefab.name}");
+            return;
+        }
+
+        Debug.Log($"🧬 Fusion success: {sourceA} + {sourceB} -> {upgradeData.GetTargetWeaponName()}");
     }
 }

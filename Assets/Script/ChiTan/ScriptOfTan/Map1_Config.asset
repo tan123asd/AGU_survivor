@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MapConfig
   mapName: Map 1
   mapDescription: CHITANMAP
-  timeLimitInSeconds: 10
+  timeLimitInSeconds: 120
   bossPrefab: {fileID: 7441429887425416535, guid: 28dcf5d33f70a334d9fbca1d7bc5414c, type: 3}
   initialBossCount: 2
   bossSpawnInterval: 10

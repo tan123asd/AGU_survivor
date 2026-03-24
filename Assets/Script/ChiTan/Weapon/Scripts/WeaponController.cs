@@ -9,27 +9,37 @@ public class WeaponController : MonoBehaviour
     [Header("Weapons")]
     [SerializeField] private List<Weapon> weapons = new List<Weapon>();
     [SerializeField] private int maxWeapons = 6; // Số weapon tối đa
-    
-    private void Start()
+
+    private Transform ResolveOwnerRoot()
     {
-        Debug.Log($"🔍 WeaponController.Start() on GameObject: {gameObject.name}");
-        
-        // Tìm Player GameObject
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player == null)
+        PlayerEntity owner = GetComponentInParent<PlayerEntity>();
+        if (owner != null)
+            return owner.RootTransform != null ? owner.RootTransform : owner.transform;
+
+        if (PlayerController.Instance != null)
         {
-            Debug.LogError("❌ Cannot find Player GameObject!");
+            PlayerEntity localPlayer = PlayerController.Instance.GetLocalPlayer();
+            if (localPlayer != null)
+                return localPlayer.RootTransform != null ? localPlayer.RootTransform : localPlayer.transform;
+        }
+
+        return transform.root;
+    }
+
+    private void RefreshWeaponsFromOwner()
+    {
+        Transform ownerRoot = ResolveOwnerRoot();
+        if (ownerRoot == null)
+        {
+            Debug.LogError("❌ Cannot resolve owner root for WeaponController!");
             return;
         }
-        
-        Debug.Log($"🔍 Looking for weapons in Player: {player.name}");
-        
-        // Lấy tất cả weapons từ PLAYER (không phải từ WeaponController)
-        Weapon[] allWeapons = player.GetComponentsInChildren<Weapon>(true);
-        
+
+        Debug.Log($"🔍 Looking for weapons in owner root: {ownerRoot.name}");
+        Weapon[] allWeapons = ownerRoot.GetComponentsInChildren<Weapon>(true);
+
         Debug.Log($"🔍 GetComponentsInChildren found: {allWeapons.Length} weapons");
-        
-        // Thêm weapons vào list (tránh duplicate)
+
         foreach (var weapon in allWeapons)
         {
             if (!weapons.Contains(weapon))
@@ -38,6 +48,17 @@ public class WeaponController : MonoBehaviour
                 Debug.Log($"  📍 Found weapon on: {weapon.gameObject.name} (component: {weapon.GetType().Name})");
             }
         }
+    }
+
+    private void CompactWeaponList()
+    {
+        weapons.RemoveAll(w => w == null);
+    }
+    
+    private void Start()
+    {
+        Debug.Log($"🔍 WeaponController.Start() on GameObject: {gameObject.name}");
+        RefreshWeaponsFromOwner();
         
         Debug.Log($"🔫 WeaponController: Found {weapons.Count} weapons");
         foreach (var weapon in weapons)
@@ -51,6 +72,8 @@ public class WeaponController : MonoBehaviour
     /// </summary>
     public bool AddWeapon(GameObject weaponPrefab)
     {
+        CompactWeaponList();
+
         if (weaponPrefab == null)
         {
             Debug.LogError("Weapon prefab is null!");
@@ -69,6 +92,13 @@ public class WeaponController : MonoBehaviour
         
         if (weapon != null)
         {
+            if (HasWeapon(weapon.WeaponName))
+            {
+                Debug.LogWarning($"Weapon '{weapon.WeaponName}' already exists. Skipping duplicate add.");
+                Destroy(weaponObj);
+                return false;
+            }
+
             weapons.Add(weapon);
             Debug.Log($"✅ Added weapon: {weapon.WeaponName} (Lv.{weapon.WeaponLevel})");
             return true;
@@ -83,22 +113,23 @@ public class WeaponController : MonoBehaviour
     /// </summary>
     public bool UpgradeWeapon(string weaponName)
     {
-        Weapon weapon = GetWeapon(weaponName);
+        string weaponId = Weapon.NormalizeWeaponId(weaponName);
+        Weapon weapon = GetWeapon(weaponId);
         
         if (weapon == null)
         {
-            Debug.LogWarning($"Weapon '{weaponName}' not found!");
+            Debug.LogWarning($"Weapon '{weaponId}' not found!");
             return false;
         }
         
         if (!weapon.CanUpgrade)
         {
-            Debug.LogWarning($"Weapon '{weaponName}' is already max level!");
+            Debug.LogWarning($"Weapon '{weaponId}' is already max level!");
             return false;
         }
         
         weapon.Upgrade();
-        Debug.Log($"✨ Upgraded {weaponName} to Level {weapon.WeaponLevel}");
+        Debug.Log($"✨ Upgraded {weaponId} to Level {weapon.WeaponLevel}");
         return true;
     }
     
@@ -107,7 +138,9 @@ public class WeaponController : MonoBehaviour
     /// </summary>
     public Weapon GetWeapon(string weaponName)
     {
-        return weapons.Find(w => w.WeaponName == weaponName);
+        CompactWeaponList();
+        string weaponId = Weapon.NormalizeWeaponId(weaponName);
+        return weapons.Find(w => w != null && w.WeaponName == weaponId);
     }
     
     /// <summary>
@@ -116,6 +149,24 @@ public class WeaponController : MonoBehaviour
     public bool HasWeapon(string weaponName)
     {
         return GetWeapon(weaponName) != null;
+    }
+
+    public bool IsWeaponAtMax(string weaponName)
+    {
+        Weapon weapon = GetWeapon(weaponName);
+        return weapon != null && !weapon.CanUpgrade;
+    }
+
+    public bool RemoveWeapon(string weaponName)
+    {
+        CompactWeaponList();
+
+        Weapon weapon = GetWeapon(weaponName);
+        if (weapon == null) return false;
+
+        weapons.Remove(weapon);
+        Destroy(weapon.gameObject);
+        return true;
     }
     
     /// <summary>

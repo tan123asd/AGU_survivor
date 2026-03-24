@@ -9,12 +9,6 @@ public class LightningWeapon : ProjectileWeapon
     [Header("Lightning Special")]
     [SerializeField] private float extraCooldownReduction = 0.05f; // Extra 5% per level
     
-    protected override void Start()
-    {
-        weaponName = "lightning";
-        base.Start();
-    }
-    
     protected override void CalculateStats()
     {
         // Gọi base calculation first

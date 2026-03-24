@@ -25,6 +25,14 @@ public class UpgradeData : ScriptableObject
     public string targetWeaponName = ""; // Tên weapon cần upgrade (nếu mode = Upgrade)
     [Tooltip("CHỈ CẦN nếu mode = Add và KHÔNG dùng WeaponData")]
     public GameObject weaponPrefab; // Prefab vũ khí để thêm vào player (nếu mode = Add)
+
+    [Header("Fusion Requirements (for Fusion mode)")]
+    [Tooltip("Weapon nguồn 1 cần có để hợp thể")]
+    public string fusionSourceWeaponA = "";
+    [Tooltip("Weapon nguồn 2 cần có để hợp thể")]
+    public string fusionSourceWeaponB = "";
+    [Tooltip("Bật để chỉ cho hợp thể khi 2 weapon nguồn đều max level")]
+    public bool requireSourcesAtMaxLevel = true;
     
     [System.Serializable]
     public struct BuffEffect
@@ -43,7 +51,8 @@ public class UpgradeData : ScriptableObject
     public enum WeaponUpgradeMode
     {
         Add,     // Thêm weapon mới
-        Upgrade  // Upgrade weapon hiện có
+        Upgrade, // Upgrade weapon hiện có
+        Fusion   // Hợp thể 2 weapon thành 1 weapon mới
     }
     
     public IStatModifier[] GetStatModifiers()
@@ -81,8 +90,34 @@ public class UpgradeData : ScriptableObject
     public string GetTargetWeaponName()
     {
         if (weaponData != null)
-            return weaponData.weaponId;
-        return targetWeaponName;
+            return Weapon.NormalizeWeaponId(weaponData.weaponId);
+        return Weapon.NormalizeWeaponId(targetWeaponName);
+    }
+
+    public string GetFusionSourceWeaponA()
+    {
+        return Weapon.NormalizeWeaponId(fusionSourceWeaponA);
+    }
+
+    public string GetFusionSourceWeaponB()
+    {
+        return Weapon.NormalizeWeaponId(fusionSourceWeaponB);
+    }
+
+    public bool CanApplyFusion(WeaponController weaponController)
+    {
+        if (weaponController == null) return false;
+
+        string sourceA = GetFusionSourceWeaponA();
+        string sourceB = GetFusionSourceWeaponB();
+        if (string.IsNullOrEmpty(sourceA) || string.IsNullOrEmpty(sourceB)) return false;
+
+        bool hasA = weaponController.HasWeapon(sourceA);
+        bool hasB = weaponController.HasWeapon(sourceB);
+        if (!hasA || !hasB) return false;
+
+        if (!requireSourcesAtMaxLevel) return true;
+        return weaponController.IsWeaponAtMax(sourceA) && weaponController.IsWeaponAtMax(sourceB);
     }
     
     /// <summary>
@@ -147,10 +182,25 @@ public class UpgradeData : ScriptableObject
             {
                 weaponPrefab = weaponData.weaponPrefab;
             }
-            else if (weaponMode == WeaponUpgradeMode.Upgrade)
+            else if (weaponMode == WeaponUpgradeMode.Upgrade || weaponMode == WeaponUpgradeMode.Fusion)
             {
-                targetWeaponName = weaponData.weaponId;
+                targetWeaponName = Weapon.NormalizeWeaponId(weaponData.weaponId);
             }
+        }
+
+        if (!string.IsNullOrWhiteSpace(targetWeaponName))
+        {
+            targetWeaponName = Weapon.NormalizeWeaponId(targetWeaponName);
+        }
+
+        if (!string.IsNullOrWhiteSpace(fusionSourceWeaponA))
+        {
+            fusionSourceWeaponA = Weapon.NormalizeWeaponId(fusionSourceWeaponA);
+        }
+
+        if (!string.IsNullOrWhiteSpace(fusionSourceWeaponB))
+        {
+            fusionSourceWeaponB = Weapon.NormalizeWeaponId(fusionSourceWeaponB);
         }
     }
 }

@@ -12,12 +12,6 @@ public class BombWeapon : Weapon
     [SerializeField] private float explosionRadius = 3f;
     [SerializeField] private float stunDuration = 0.5f;
     
-    protected override void Start()
-    {
-        weaponName = "bomb";
-        base.Start();
-    }
-    
     protected override void CalculateStats()
     {
         base.CalculateStats();

@@ -1,4 +1,5 @@
 using UnityEngine;
+using Photon.Pun;
 
 /// <summary>
 /// Viên đạn bay và gây damage khi chạm enemy
@@ -60,16 +61,21 @@ public class Projectile : MonoBehaviour
         // Kiểm tra xem có phải enemy không
         if (other.CompareTag("Enemy"))
         {
-            // Gây damage
-            IDamageable damageable = other.GetComponent<IDamageable>();
-            if (damageable != null)
+            // Gameplay authority: only MasterClient applies damage when online.
+            bool canApplyDamage = !PhotonNetwork.IsConnected || PhotonNetwork.IsMasterClient;
+            if (canApplyDamage)
             {
-                damageable.TakeDamage(damage);
-                Debug.Log($"Projectile hit enemy for {damage} damage!");
+                IDamageable damageable = other.GetComponent<IDamageable>();
+                if (damageable != null)
+                {
+                    damageable.TakeDamage(damage);
+                    Debug.Log($"Projectile hit enemy for {damage} damage!");
+                }
+
+                // Side effects that can impact gameplay (e.g., burning) must
+                // also be authority-gated to avoid client-side desync.
+                OnHitEnemy(other);
             }
-            
-            // Gọi virtual method để subclass có thể override (ví dụ: thêm burning effect)
-            OnHitEnemy(other);
             
             // Hủy viên đạn
             Destroy(gameObject);

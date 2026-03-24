@@ -17,7 +17,6 @@ public class FireballWeapon : ProjectileWeapon
     
     protected override void Start()
     {
-        weaponName = "fireball";
         base.Start();
         
         Debug.Log("🔥 Fireball Weapon loaded! Effect: Burn enemies (1 dmg/sec for 5s)");

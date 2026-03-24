@@ -1,4 +1,5 @@
 using UnityEngine;
+using Photon.Pun;
 
 /// <summary>
 /// Vũ khí bắn đạn tự động vào enemy gần nhất
@@ -10,12 +11,12 @@ public class ProjectileWeapon : Weapon
     [SerializeField] private Transform firePoint; // Vị trí spawn đạn (optional)
     private int projectileNumber;
 
-    protected override void Start()
+    protected override bool ShouldRunWeaponLogic()
     {
-        // Set weaponName để WeaponController có thể tìm được
-        weaponName = "DefaultWeapon"; // Khớp với UpgradeData
-        
-        base.Start(); // Gọi base.Start() để tính stats
+        // Step 2 split: projectile firing runs on all clients for visuals,
+        // while Projectile itself remains master-authoritative for damage.
+        if (!PhotonNetwork.IsConnected) return true;
+        return true;
     }
 
     protected override void OnUpgrade()

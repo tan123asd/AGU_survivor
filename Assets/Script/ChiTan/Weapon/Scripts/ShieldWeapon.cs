@@ -10,12 +10,6 @@ public class ShieldWeapon : Weapon
     [SerializeField] private int healAmountPerLevel = 10;
     [SerializeField] private float damageReduction = 0.05f; // 5% per level
     
-    protected override void Start()
-    {
-        weaponName = "shield";
-        base.Start();
-    }
-    
     protected override void OnUpgrade()
     {
         Debug.Log($"🛡️ SHIELD UPGRADED! Level {weaponLevel} - DEFENSE BOOST!");
@@ -42,19 +36,17 @@ public class ShieldWeapon : Weapon
     {
         // Shield không attack - passive defense
         // Hoặc có thể reflect damage về enemies gần
-        
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+
+        var enemies = FindEnemiesInRange(range);
         foreach (var enemy in enemies)
         {
-            float distance = Vector2.Distance(player.position, enemy.transform.position);
-            if (distance < range)
+            if (enemy == null) continue;
+
+            // Reflect damage
+            IDamageable damageable = enemy.GetComponent<IDamageable>();
+            if (damageable != null)
             {
-                // Reflect damage
-                IDamageable damageable = enemy.GetComponent<IDamageable>();
-                if (damageable != null)
-                {
-                    damageable.TakeDamage(damage / 2); // Reflect một nửa damage
-                }
+                damageable.TakeDamage(damage / 2); // Reflect một nửa damage
             }
         }
     }

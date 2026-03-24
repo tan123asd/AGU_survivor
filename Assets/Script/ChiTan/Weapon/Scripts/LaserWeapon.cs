@@ -10,12 +10,6 @@ public class LaserWeapon : ProjectileWeapon
     [SerializeField] private float bonusRangeMultiplier = 0.1f; // Extra 10% range per level
     [SerializeField] private float bonusDamageMultiplier = 0.05f; // Extra 5% damage per level
     
-    protected override void Start()
-    {
-        weaponName = "laser";
-        base.Start();
-    }
-    
     protected override void CalculateStats()
     {
         base.CalculateStats();
