@@ -10,10 +10,17 @@ public class Projectile : MonoBehaviour
     [SerializeField] private int damage = 10;
     [SerializeField] private float lifetime = 5f; // Tự hủy sau 5s nếu không chạm gì
     [SerializeField] private float zPosition = -0.5f; // Z position để hiển thị giữa player và background
-    
+
+    // If true, the projectile will NOT be destroyed when hitting an enemy
+    // Useful for orbiting projectiles that should persist
+    public bool persistentOnHit = false;
+
+    // If true, the automatic lifetime destroy is disabled (infinite)
+    public bool disableLifetime = false;
+
     private Vector2 direction;
     private Rigidbody2D rb;
-    
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -23,24 +30,26 @@ public class Projectile : MonoBehaviour
             rb.gravityScale = 0; // Không chịu trọng lực
         }
     }
-    
+
     private void Start()
     {
         // Đảm bảo z position đúng để hiển thị trên layer phù hợp
         Vector3 pos = transform.position;
         pos.z = zPosition;
         transform.position = pos;
-        
+
         // Tự hủy sau lifetime
-        Destroy(gameObject, lifetime);
+        if (!disableLifetime && lifetime > 0f)
+            Destroy(gameObject, lifetime);
     }
-    
+
     private void FixedUpdate()
     {
         // Bay theo hướng
-        rb.linearVelocity = direction * speed;
+        if (rb != null)
+            rb.linearVelocity = direction * speed;
     }
-    
+
     /// <summary>
     /// Set hướng bay và damage
     /// </summary>
@@ -48,13 +57,16 @@ public class Projectile : MonoBehaviour
     {
         direction = dir.normalized;
         damage = dmg;
-        
+
         // Xoay mũi vũ khí theo hướng bay
         // -90 vì sprite mũi nhọn đang hướng lên (↑) thay vì phải (→)
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
-        transform.rotation = Quaternion.Euler(0, 0, angle);
+        if (direction != Vector2.zero)
+        {
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
+            transform.rotation = Quaternion.Euler(0, 0, angle);
+        }
     }
-    
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         // Kiểm tra xem có phải enemy không
@@ -65,15 +77,28 @@ public class Projectile : MonoBehaviour
             if (damageable != null)
             {
                 damageable.TakeDamage(damage);
-                Debug.Log($"Projectile hit enemy for {damage} damage!");
+                Debug.Log($"Projectile hit enemy for {damage} damage! (proj={name})");
             }
-            
+
             // Gọi virtual method để subclass có thể override (ví dụ: thêm burning effect)
             OnHitEnemy(other);
-            
-            // Hủy viên đạn
-            Destroy(gameObject);
+
+            // Hủy viên đạn chỉ khi không được cấu hình là persistent
+            if (!persistentOnHit)
+            {
+                Debug.Log($"Projectile.Destroy called on hit: {name}");
+                Destroy(gameObject);
+            }
+            else
+            {
+                if (Debug.isDebugBuild) Debug.Log($"Projectile persistent on hit, not destroyed: {name}");
+            }
         }
+    }
+
+    private void OnDestroy()
+    {
+        Debug.Log($"Projectile.OnDestroy: {name} | persistentOnHit={persistentOnHit} | disableLifetime={disableLifetime}");
     }
 
     /// <summary>
