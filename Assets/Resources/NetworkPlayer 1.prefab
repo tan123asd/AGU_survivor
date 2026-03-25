@@ -423,5 +423,11 @@ MonoBehaviour:
   baseAttackInterval: 3
   baseRange: 10
   debugMode: 1
-  projectilePrefab: {fileID: 7174401495918054263, guid: 217029eb9f5e3d642807772dc382893d, type: 3}
+  projectilePrefab: {fileID: 2176621843390485237, guid: 55e942e8aa671c5449bd1e026edb6e01, type: 3}
   firePoint: {fileID: 0}
+  isSpinning: 1
+  spinRadius: 1.5
+  spinAngularSpeed: 180
+  spinLifetime: 5
+  spinRadiusPerProjectile: 0.12
+  minSpinRadius: 1.5
