@@ -24,6 +24,17 @@ public class PlayerMovement2D : MonoBehaviour
     // Null when offline (single-player). Non-null in multiplayer.
     private PhotonView _photonView;
 
+    [Header("Visual Options")]
+    [Tooltip("Invert the flip logic for this prefab. Use when animation faces opposite direction on default.")]
+    [SerializeField] private bool invertFlip = false;
+
+    // Horizontal raw input (un-normalized) used for stable flip decisions
+    private float lastRawHorizontal = 0f;
+    // Last non-zero horizontal direction: 1 = facing right, -1 = facing left
+    private int lastFacingSign = 1;
+    // Deadzone to ignore small input noise
+    private const float horizontalDeadzone = 0.15f;
+
     // ─── Lifecycle ────────────────────────────────────────────────────────────
     private void Awake()
     {
@@ -90,6 +101,11 @@ public class PlayerMovement2D : MonoBehaviour
         float h = Input.GetAxisRaw("Horizontal"); // A/D hoặc Left/Right
         float v = Input.GetAxisRaw("Vertical");   // W/S hoặc Up/Down
         moveInput = new Vector2(h, v).normalized;
+
+        // Store raw horizontal for flip decision and remember last non-zero direction
+        lastRawHorizontal = h;
+        if (Mathf.Abs(h) > horizontalDeadzone)
+            lastFacingSign = h > 0f ? 1 : -1;
     }
 
     // ─── Movement ─────────────────────────────────────────────────────────────
@@ -109,8 +125,21 @@ public class PlayerMovement2D : MonoBehaviour
     private void FlipSprite()
     {
         if (spriteRenderer == null) return;
-        if (moveInput.x > 0)       spriteRenderer.flipX = false;
-        else if (moveInput.x < 0)  spriteRenderer.flipX = true;
+
+        // Use raw horizontal input to decide flip; ignore small noise via deadzone
+        if (Mathf.Abs(lastRawHorizontal) > horizontalDeadzone)
+        {
+            bool flip = lastRawHorizontal < 0f;
+            if (invertFlip) flip = !flip;
+            spriteRenderer.flipX = flip;
+        }
+        else
+        {
+            // No strong horizontal input — keep last facing direction
+            bool flip = lastFacingSign < 0;
+            if (invertFlip) flip = !flip;
+            spriteRenderer.flipX = flip;
+        }
     }
 
     // ─── Public API ───────────────────────────────────────────────────────────

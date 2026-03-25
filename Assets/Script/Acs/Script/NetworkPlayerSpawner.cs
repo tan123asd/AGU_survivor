@@ -28,6 +28,10 @@ public class NetworkPlayerSpawner : MonoBehaviourPunCallbacks
     [Tooltip("Name of the player prefab inside Assets/Resources/. Must match exactly.")]
     [SerializeField] private string networkPlayerPrefabName = "NetworkPlayer";
 
+    [Header("Options")]
+    [Tooltip("If true, do not auto-spawn on join. Call SpawnSelectedNetworkPlayer(prefabName) to spawn chosen prefab.")]
+    [SerializeField] private bool waitForSelection = true;
+
     [Header("Health Bar UI (Local Only)")]
     [Tooltip("HealthBar canvas prefab instantiated only for the owning client.")]
     [SerializeField] private GameObject healthBarCanvasPrefab;
@@ -49,15 +53,24 @@ public class NetworkPlayerSpawner : MonoBehaviourPunCallbacks
     /// <summary>The local (IsMine) player GameObject after spawning.</summary>
     private GameObject _localPlayerObj;
 
+    // Prefab name pending spawn (selection happened before joining room)
+    private string pendingSpawnPrefabName = null;
+
     // ─── Lifecycle ────────────────────────────────────────────────────────────
 
     private void Start()
     {
+        if (waitForSelection)
+        {
+            if (showDebugLogs) Debug.Log("[NetworkPlayerSpawner] waiting for selection before spawning.");
+            return;
+        }
+
         // If already in the room, spawn straight away.
         // If not yet joined (rare race condition), wait via OnJoinedRoom.
         if (PhotonNetwork.InRoom)
         {
-            SpawnLocalPlayer();
+            SpawnLocalPlayer(networkPlayerPrefabName);
         }
         else
         {
@@ -68,41 +81,111 @@ public class NetworkPlayerSpawner : MonoBehaviourPunCallbacks
 
     /// <summary>
     /// Fallback: if Start() fires before the client is fully in the room,
-    /// this callback will trigger the spawn.
+    /// this callback will trigger the spawn when appropriate.
     /// </summary>
     public override void OnJoinedRoom()
     {
         if (_localPlayerObj == null)
-            SpawnLocalPlayer();
+        {
+            if (!string.IsNullOrEmpty(pendingSpawnPrefabName))
+            {
+                string name = pendingSpawnPrefabName;
+                pendingSpawnPrefabName = null;
+                if (showDebugLogs) Debug.Log($"[NetworkPlayerSpawner] OnJoinedRoom: processing pending spawn '{name}'");
+                SpawnLocalPlayer(name);
+            }
+            else if (!waitForSelection)
+            {
+                SpawnLocalPlayer(networkPlayerPrefabName);
+            }
+        }
+    }
+
+    // ─── Public API ──────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Call this to spawn a network player prefab by name. If the client is not yet in a Photon room,
+    /// the spawn is queued until OnJoinedRoom.
+    /// Prefab must be located under Assets/Resources/ (name without extension) for PhotonNetwork.Instantiate.
+    /// </summary>
+    public void SpawnSelectedNetworkPlayer(string prefabName)
+    {
+        if (string.IsNullOrEmpty(prefabName))
+        {
+            Debug.LogError("[NetworkPlayerSpawner] SpawnSelectedNetworkPlayer called with empty name.");
+            return;
+        }
+
+        if (_localPlayerObj != null)
+        {
+            if (showDebugLogs) Debug.LogWarning("[NetworkPlayerSpawner] Local player already spawned — ignoring additional spawn request.");
+            return;
+        }
+
+        // If connected but not in room yet, queue until OnJoinedRoom
+        if (PhotonNetwork.IsConnected && !PhotonNetwork.InRoom)
+        {
+            pendingSpawnPrefabName = prefabName;
+            if (showDebugLogs) Debug.Log($"[NetworkPlayerSpawner] Queued spawn '{prefabName}' until OnJoinedRoom.");
+            return;
+        }
+
+        // If not connected, attempt local instantiate from Resources (offline fallback)
+        if (!PhotonNetwork.IsConnected)
+        {
+            if (showDebugLogs) Debug.Log($"[NetworkPlayerSpawner] Photon not connected — spawning locally '{prefabName}'.");
+            SpawnLocalPlayer(prefabName);
+            return;
+        }
+
+        // Otherwise spawn immediately (in-room)
+        SpawnLocalPlayer(prefabName);
     }
 
     // ─── Spawn Logic ──────────────────────────────────────────────────────────
 
-    private void SpawnLocalPlayer()
+    private void SpawnLocalPlayer(string prefabName)
     {
+        if (_localPlayerObj != null)
+            return;
+
         // ── 1. Pick spawn position ────────────────────────────────────────────
         Vector3 spawnPos = GetSpawnPosition();
 
-        // ── 2. Network-instantiate the player prefab ──────────────────────────
-        // PhotonNetwork.Instantiate creates the prefab on ALL clients,
-        // but only this client owns it (photonView.IsMine == true here).
-        _localPlayerObj = PhotonNetwork.Instantiate(
-            networkPlayerPrefabName,
-            spawnPos,
-            Quaternion.identity
-        );
+        // Use provided prefab name if not empty, otherwise fall back
+        string nameToSpawn = string.IsNullOrEmpty(prefabName) ? networkPlayerPrefabName : prefabName;
 
+        // ── 2. Network-instantiate the player prefab ──────────────────────────
+        if (PhotonNetwork.IsConnected && PhotonNetwork.InRoom)
+        {
+            try
+            {
+                _localPlayerObj = PhotonNetwork.Instantiate(nameToSpawn, spawnPos, Quaternion.identity);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogWarning($"[NetworkPlayerSpawner] Photon Instantiate failed for '{nameToSpawn}': {ex.Message}. Trying local Resources load.");
+            }
+        }
+
+        // If still null, attempt local Resources load and Instantiate
         if (_localPlayerObj == null)
         {
-            Debug.LogError(
-                $"[NetworkPlayerSpawner] PhotonNetwork.Instantiate failed! " +
-                $"Make sure '{networkPlayerPrefabName}' exists in Assets/Resources/."
-            );
-            return;
+            GameObject prefab = Resources.Load<GameObject>(nameToSpawn);
+            if (prefab != null)
+            {
+                _localPlayerObj = Instantiate(prefab, spawnPos, Quaternion.identity);
+                if (showDebugLogs) Debug.Log($"[NetworkPlayerSpawner] Locally instantiated '{nameToSpawn}' as fallback.");
+            }
+            else
+            {
+                Debug.LogError($"[NetworkPlayerSpawner] Could not find prefab '{nameToSpawn}' in Resources and Photon instantiate failed.");
+                return;
+            }
         }
 
         if (showDebugLogs)
-            Debug.Log($"[NetworkPlayerSpawner] Spawned local player at {spawnPos}");
+            Debug.Log($"[NetworkPlayerSpawner] Spawned local player '{nameToSpawn}' at {spawnPos}");
 
         // ── 3. Local-only setup (camera, health bar) ──────────────────────────
         WireCamera(_localPlayerObj);

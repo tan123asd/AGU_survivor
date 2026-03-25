@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
 // Run before CameraDirector (-1) and Enemy (0) so the player is registered
 // in PlayerController before any other Start() tries to find it.
 [DefaultExecutionOrder(-50)]
-public class PlayerSpawner : MonoBehaviour
+public class PlayerSpawner : MonoBehaviourPunCallbacks
 {
     // ─── Inspector ────────────────────────────────────────────────────────────
     [Header("Player Prefabs")]
@@ -33,13 +34,24 @@ public class PlayerSpawner : MonoBehaviour
     [SerializeField] private float spawnRadius = 5f;
     [SerializeField] private Vector2 mapCenter = Vector2.zero;
 
+    [Header("Options")]
+    [Tooltip("If true, PlayerSpawner will wait until SpawnSelectedPlayerFromName() is called instead of spawning in Start().")]
+    [SerializeField] private bool waitForSelection = true; // default changed to true
+
     [Header("Debug")]
     [SerializeField] private bool showDebugLogs = true;
+    
+    // Pending spawn when selection happens before joining Photon room          
+    private string pendingSpawnPrefabName = null;
+    private int pendingSpawnCount = 1;
 
-    // ─── Lifecycle ────────────────────────────────────────────────────────────
+    // ─── Lifecycle ───────────────────────────────────────────────────────────
     private void Start()
     {
-        SpawnPlayers(playerCount);
+        if (!waitForSelection)
+            SpawnPlayers(playerCount);
+        else if (showDebugLogs)
+            Debug.Log("[PlayerSpawner] Waiting for player selection before spawning. Set 'waitForSelection' to false to auto-spawn.");
     }
 
     // ─── Spawn Logic ──────────────────────────────────────────────────────────
@@ -90,8 +102,14 @@ public class PlayerSpawner : MonoBehaviour
                 Debug.LogWarning("[PlayerSpawner] No healthBarCanvasPrefab assigned — HealthBar UI will not show.");
             }
 
-            // ── 2. Spawn Player ───────────────────────────────────────────────
-            GameObject playerObj = Instantiate(prefabToSpawn, spawnPos, Quaternion.identity);
+            // ── 2. Spawn Player (network-aware) ───────────────────────────────
+            GameObject playerObj = SpawnOne(prefabToSpawn, spawnPos);
+            if (playerObj == null)
+            {
+                Debug.LogError($"[PlayerSpawner] Failed to spawn player prefab: {prefabToSpawn.name}");
+                continue;
+            }
+
             playerObj.name = $"Player_{i}";
 
             PlayerEntity player = playerObj.GetComponent<PlayerEntity>();
@@ -132,7 +150,138 @@ public class PlayerSpawner : MonoBehaviour
         }
     }
 
-    // ─── Position helpers ─────────────────────────────────────────────────────
+    /// <summary>
+    /// Spawns a single player prefab at the position. Uses PhotonNetwork.Instantiate when connected and in a room.
+    /// Returns the spawned GameObject (or null on failure).
+    /// </summary>
+    private GameObject SpawnOne(GameObject prefab, Vector3 position)
+    {
+        if (prefab == null) return null;
+
+        // If Photon is connected and in a room, prefer PhotonNetwork.Instantiate so networked players are created across clients.
+        if (PhotonNetwork.IsConnected && PhotonNetwork.InRoom)
+        {
+            try
+            {
+                if (showDebugLogs) Debug.Log($"[PlayerSpawner] PhotonNetwork.Instantiate: {prefab.name} at {position}");
+                GameObject netObj = PhotonNetwork.Instantiate(prefab.name, position, Quaternion.identity);
+                return netObj;
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogWarning($"[PlayerSpawner] Photon Instantiate failed for '{prefab.name}': {ex.Message}. Falling back to local Instantiate.");
+                return Instantiate(prefab, position, Quaternion.identity);
+            }
+        }
+
+        // Offline fallback or not yet in room
+        if (showDebugLogs) Debug.Log($"[PlayerSpawner] Local Instantiate: {prefab.name} at {position}");
+        return Instantiate(prefab, position, Quaternion.identity);
+    }
+
+    /// <summary>
+    /// External API: spawn a selected prefab by name. This is intended to be called
+    /// after a player chooses a character in the UI. If the prefab name matches one
+    /// of the configured playerPrefabs, that prefab will be used; otherwise, the
+    /// method will attempt to load the prefab from Resources by name.
+    /// If the client is not yet in a Photon room, the spawn will be queued and executed when OnJoinedRoom fires.
+    /// </summary>
+    public void SpawnSelectedPlayerFromName(string prefabName)
+    {
+        if (string.IsNullOrEmpty(prefabName))
+        {
+            Debug.LogError("[PlayerSpawner] SpawnSelectedPlayerFromName called with empty name.");
+            return;
+        }
+
+        // Find matching prefab in the configured list
+        GameObject selected = null;
+        if (playerPrefabs != null)
+        {
+            foreach (var p in playerPrefabs)
+            {
+                if (p != null && p.name == prefabName)
+                {
+                    selected = p;
+                    break;
+                }
+            }
+        }
+
+        // Try Resources load as fallback
+        if (selected == null)
+        {
+            GameObject res = Resources.Load<GameObject>(prefabName);
+            if (res != null)
+            {
+                selected = res;
+                if (showDebugLogs) Debug.Log($"[PlayerSpawner] Loaded prefab '{prefabName}' from Resources.");
+            }
+        }
+
+        if (selected == null)
+        {
+            Debug.LogError($"[PlayerSpawner] Could not find player prefab named '{prefabName}'. Make sure it's assigned in playerPrefabs or located in Resources/.");
+            return;
+        }
+
+        // If Photon is connected but not yet in a room, queue spawn until OnJoinedRoom.
+        if (PhotonNetwork.IsConnected && !PhotonNetwork.InRoom)
+        {
+            pendingSpawnPrefabName = prefabName;
+            pendingSpawnCount = 1;
+            if (showDebugLogs) Debug.Log($"[PlayerSpawner] Queued spawn for '{prefabName}' until OnJoinedRoom.");
+            return;
+        }
+
+        // If not connected at all but waitForSelection is true, still spawn locally.
+        if (!PhotonNetwork.IsConnected)
+        {
+            if (showDebugLogs) Debug.Log("[PlayerSpawner] Photon not connected — spawning locally.");
+            SpawnPlayersWithSpecificPrefab(selected, 1);
+            return;
+        }
+
+        // Otherwise spawn immediately (either offline fallback or already in room)
+        SpawnPlayersWithSpecificPrefab(selected, 1);
+    }
+
+    private void SpawnPlayersWithSpecificPrefab(GameObject prefab, int count)
+    {
+        if (prefab == null) return;
+        List<Vector3> positions = BuildSpawnPositions(count);
+
+        for (int i = 0; i < count; i++)
+        {
+            GameObject playerObj = SpawnOne(prefab, positions[i]);
+            if (playerObj == null) continue;
+
+            playerObj.name = $"Player_{i}";
+            PlayerEntity player = playerObj.GetComponent<PlayerEntity>() ?? playerObj.GetComponentInChildren<PlayerEntity>();
+            if (player != null)
+            {
+                player.SetPlayerIndex(i);
+                player.SetRootTransform(playerObj.transform);
+            }
+        }
+    }
+
+    // ─── Photon Callbacks ─────────────────────────────────────────────────────
+    public override void OnJoinedRoom()
+    {
+        base.OnJoinedRoom();
+        if (showDebugLogs) Debug.Log("[PlayerSpawner] OnJoinedRoom fired.");
+
+        if (!string.IsNullOrEmpty(pendingSpawnPrefabName))
+        {
+            string prefabName = pendingSpawnPrefabName;
+            pendingSpawnPrefabName = null;
+            if (showDebugLogs) Debug.Log($"[PlayerSpawner] Processing pending spawn: {prefabName}");
+            SpawnSelectedPlayerFromName(prefabName);
+        }
+    }
+
+    // ─── Position helpers ─────────────────────────────────────────────────────────
 
     private List<Vector3> BuildSpawnPositions(int count)
     {
