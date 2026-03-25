@@ -6467,11 +6467,15 @@ PrefabInstance:
     - target: {fileID: 3809188548891456837, guid: 277aea41e72ac1f44bc378e12d618f29, type: 3}
       propertyPath: 'upgradeDatas.Array.data[4]'
       value: 
-      objectReference: {fileID: 11400000, guid: 46bd4ebc8bdebfc44b944f42b235cf1f, type: 2}
+      objectReference: {fileID: 11400000, guid: e6411de3bb31b964da8ece70522ba683, type: 2}
     - target: {fileID: 3809188548891456837, guid: 277aea41e72ac1f44bc378e12d618f29, type: 3}
       propertyPath: 'upgradeDatas.Array.data[5]'
       value: 
-      objectReference: {fileID: 11400000, guid: aceba176dd764144685d05823c8c6cde, type: 2}
+      objectReference: {fileID: 11400000, guid: bc1481d2de02b2e43adadc6cfee0a0e6, type: 2}
+    - target: {fileID: 3809188548891456837, guid: 277aea41e72ac1f44bc378e12d618f29, type: 3}
+      propertyPath: 'upgradeDatas.Array.data[6]'
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 4545075028065875324, guid: 277aea41e72ac1f44bc378e12d618f29, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
