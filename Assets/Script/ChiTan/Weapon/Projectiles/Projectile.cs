@@ -77,23 +77,20 @@ public class Projectile : MonoBehaviour
             bool canApplyDamage = !PhotonNetwork.IsConnected || PhotonNetwork.IsMasterClient;
             if (canApplyDamage)
             {
-                damageable.TakeDamage(damage);
-                Debug.Log($"Projectile hit enemy for {damage} damage! (proj={name})");
-            }
+                IDamageable damageable = other.GetComponent<IDamageable>();
+                if (damageable != null)
+                {
+                    damageable.TakeDamage(damage);
+                    Debug.Log($"Projectile hit enemy for {damage} damage!");
+                }
 
-            // Gọi virtual method để subclass có thể override (ví dụ: thêm burning effect)
-            OnHitEnemy(other);
-
-            // Hủy viên đạn chỉ khi không được cấu hình là persistent
-            if (!persistentOnHit)
-            {
-                Debug.Log($"Projectile.Destroy called on hit: {name}");
-                Destroy(gameObject);
+                // Side effects that can impact gameplay (e.g., burning) must
+                // also be authority-gated to avoid client-side desync.
+                OnHitEnemy(other);
             }
-            else
-            {
-                if (Debug.isDebugBuild) Debug.Log($"Projectile persistent on hit, not destroyed: {name}");
-            }
+            
+            // Hủy viên đạn
+            Destroy(gameObject);
         }
     }
 

@@ -168,8 +168,8 @@ public class ProjectileWeapon : Weapon
             GameObject projectile = Instantiate(projectilePrefab, pos, Quaternion.identity);
 
             // Attach orbiting behaviour and initialize explicitly
-            var orbit = projectile.GetComponent<OrbitingProjectile>();
-            if (orbit == null) orbit = projectile.AddComponent<OrbitingProjectile>();
+            var orbit = projectile.GetComponent<ProjectileOrbitBehaviour>();
+            if (orbit == null) orbit = projectile.AddComponent<ProjectileOrbitBehaviour>();
             orbit.Initialize(player, actualRadius, spinAngularSpeed, spinLifetime);
 
             // If projectile has regular Projectile script, set it persistent and initialize without direction
@@ -227,5 +227,48 @@ public class ProjectileWeapon : Weapon
     {
         // Clean up if weapon is disabled
         StopSpinning();
+    }
+}
+
+/// <summary>
+/// Runtime orbit movement used by ProjectileWeapon spinning mode.
+/// Kept in the same file to avoid cross-file type resolution issues.
+/// </summary>
+public class ProjectileOrbitBehaviour : MonoBehaviour
+{
+    private Transform center;
+    private float radius;
+    private float angularSpeed;
+    private float lifetime;
+    private float angleDeg;
+    private float timer;
+
+    public void Initialize(Transform centerTransform, float orbitRadius, float speedDegPerSec, float life)
+    {
+        center = centerTransform;
+        radius = Mathf.Max(0.1f, orbitRadius);
+        angularSpeed = speedDegPerSec;
+        lifetime = Mathf.Max(0f, life);
+
+        if (center != null)
+        {
+            Vector2 dir = transform.position - center.position;
+            angleDeg = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        }
+    }
+
+    private void Update()
+    {
+        if (center == null) return;
+
+        angleDeg += angularSpeed * Time.deltaTime;
+        float rad = angleDeg * Mathf.Deg2Rad;
+        transform.position = center.position + new Vector3(Mathf.Cos(rad), Mathf.Sin(rad), 0f) * radius;
+
+        if (lifetime <= 0f) return;
+
+        timer += Time.deltaTime;
+        if (timer >= lifetime)
+            Destroy(gameObject);
     }
 }
