@@ -8,7 +8,7 @@ public class Projectile : MonoBehaviour
 {
     [Header("Projectile Settings")]
     [SerializeField] private float speed = 10f;
-    [SerializeField] private int damage = 10;
+    [SerializeField] protected int damage = 10;
     [SerializeField] private float lifetime = 5f; // Tự hủy sau 5s nếu không chạm gì
     [SerializeField] private float zPosition = -0.5f; // Z position để hiển thị giữa player và background
 

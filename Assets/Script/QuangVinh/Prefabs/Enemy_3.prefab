@@ -11,9 +11,8 @@ GameObject:
   - component: {fileID: 2656434883926256813}
   - component: {fileID: 1495529030605374784}
   - component: {fileID: 358669174839197568}
-  - component: {fileID: 5444119675347358900}
   - component: {fileID: 8510071514475669896}
-  - component: {fileID: 4767946934689507823}
+  - component: {fileID: 5444119675347358900}
   m_Layer: 0
   m_Name: Enemy_3
   m_TagString: Enemy
@@ -117,24 +116,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &5444119675347358900
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7441429887425416535}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6c11f8705052bae469c26a676ea6b15f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: AGU_Scripts::Enemy
-  speed: 2
-  health: 3
-  expPrefabNames:
-  - Exp/Exp(Blue)
-  - Exp/Exp(RED)
-  expSpawn: []
 --- !u!61 &8510071514475669896
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -181,7 +162,7 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
---- !u!114 &4767946934689507823
+--- !u!114 &5444119675347358900
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

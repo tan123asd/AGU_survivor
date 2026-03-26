@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4892131679295754025
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2343701957802318211}
+  - component: {fileID: 1626247242625539143}
+  m_Layer: 0
+  m_Name: InfernoStorm
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2343701957802318211
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4892131679295754025}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 3.04, y: -0.71999997, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1626247242625539143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4892131679295754025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42678d9adad913542869005cc3afff60, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: AGU_Scripts::InfernoStormWeapon
+  weaponData: {fileID: 11400000, guid: 4ec80c58ad224d18a8f1d8a58d0f5f52, type: 2}
+  weaponName: DefaultWeapon
+  weaponLevel: 1
+  maxLevel: 5
+  baseDamage: 10
+  baseAttackInterval: 3
+  baseRange: 10
+  debugMode: 1
+  enemyQueryBufferSize: 64
+  projectilePrefab: {fileID: 407329643267083571, guid: 9cde9d830f7a4844282ca4aee7d37a3b, type: 3}
+  firePoint: {fileID: 0}
+  bonusProjectiles: 1
+  explosionPrefab: {fileID: 0}
+  explosionRadius: 2.5
+  aoeDamageMultiplier: 0.75
+  burnDamagePerSecond: 1
+  burnDuration: 4

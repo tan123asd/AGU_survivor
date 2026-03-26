@@ -164,6 +164,20 @@ public class UpgradePanel : MonoBehaviour
             return;
         }
 
+        GameObject fusedPrefab = upgradeData.GetWeaponPrefab();
+        if (fusedPrefab == null)
+        {
+            Debug.LogError("Fusion weapon prefab is null!");
+            return;
+        }
+
+        string fusionResultId = upgradeData.GetFusionResultWeaponName();
+        if (!string.IsNullOrEmpty(fusionResultId) && weaponController.HasWeapon(fusionResultId))
+        {
+            Debug.LogWarning($"Fusion result already exists on player: {fusionResultId}");
+            return;
+        }
+
         string sourceA = upgradeData.GetFusionSourceWeaponA();
         string sourceB = upgradeData.GetFusionSourceWeaponB();
 
@@ -172,13 +186,6 @@ public class UpgradePanel : MonoBehaviour
         if (!removedA || !removedB)
         {
             Debug.LogWarning($"Fusion failed while removing source weapons: {sourceA}, {sourceB}");
-            return;
-        }
-
-        GameObject fusedPrefab = upgradeData.GetWeaponPrefab();
-        if (fusedPrefab == null)
-        {
-            Debug.LogError("Fusion weapon prefab is null!");
             return;
         }
 

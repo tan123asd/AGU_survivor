@@ -7289,7 +7289,7 @@ PrefabInstance:
     - target: {fileID: 3809188548891456837, guid: 277aea41e72ac1f44bc378e12d618f29, type: 3}
       propertyPath: 'upgradeDatas.Array.data[6]'
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 11400000, guid: 599bba4edb536d64db66c880fc3276e6, type: 2}
     - target: {fileID: 4545075028065875324, guid: 277aea41e72ac1f44bc378e12d618f29, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

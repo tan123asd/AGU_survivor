@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7176e5d31c4537743b4428eecc714eef, type: 3}
   m_Name: BoomWeaponData
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
-  weaponId: weapon_id
-  displayName: New Weapon
+  weaponId: bomb
+  displayName: 'Bomb '
   description: "N\u1ED5"
   icon: {fileID: 0}
   weaponPrefab: {fileID: 4892131679295754025, guid: 78958dedced014843a037e2e72edd5ff, type: 3}
@@ -24,5 +24,5 @@ MonoBehaviour:
   damagePerLevel: 1
   cooldownReductionPerLevel: 0.05
   rangePerLevel: 0.1
-  minPlayerLevel: 5
+  minPlayerLevel: 1
   requiredWeapon: {fileID: 11400000}

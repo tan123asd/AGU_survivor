@@ -199,8 +199,8 @@ public class ExperienceManager : MonoBehaviour
                         continue;
                     }
 
-                    string fusionResultId = upgrade.GetTargetWeaponName();
-                    bool alreadyHasResult = weaponController.HasWeapon(fusionResultId);
+                    string fusionResultId = upgrade.GetFusionResultWeaponName();
+                    bool alreadyHasResult = !string.IsNullOrEmpty(fusionResultId) && weaponController.HasWeapon(fusionResultId);
                     bool canFuse = upgrade.CanApplyFusion(weaponController);
 
                     Debug.Log($"🧬 Checking fusion '{upgrade.displayName}': canFuse={canFuse}, alreadyHasResult={alreadyHasResult}");
@@ -220,16 +220,37 @@ public class ExperienceManager : MonoBehaviour
             Debug.Log($"  ✅ {upgrade.GetDisplayName()}");
         }
         
-        // Nếu không có valid upgrades, fallback về tất cả upgrades
+        // Nếu không có valid upgrades, fallback về stat upgrades trước
         if (validUpgrades.Count == 0)
         {
-            Debug.LogWarning("⚠️ No valid upgrades! Using all upgrades as fallback.");
-            validUpgrades = availableUpgrades;
+            List<UpgradeData> statOnlyFallback = availableUpgrades.FindAll(u => u.upgradeType == UpgradeData.UpgradeType.Stat);
+            if (statOnlyFallback.Count > 0)
+            {
+                Debug.LogWarning("⚠️ No valid weapon upgrades right now. Falling back to stat upgrades only.");
+                validUpgrades = statOnlyFallback;
+            }
+            else
+            {
+                Debug.LogWarning("⚠️ No valid upgrades! Using all upgrades as last-resort fallback.");
+                validUpgrades = availableUpgrades;
+            }
+        }
+
+        // Priority: if fusion is available, guarantee at least one fusion choice.
+        List<UpgradeData> fusionUpgrades = validUpgrades.FindAll(u =>
+            u.upgradeType == UpgradeData.UpgradeType.Weapon &&
+            u.weaponMode == UpgradeData.WeaponUpgradeMode.Fusion);
+        if (count > 0 && fusionUpgrades.Count > 0)
+        {
+            int fusionIndex = Random.Range(0, fusionUpgrades.Count);
+            UpgradeData guaranteedFusion = fusionUpgrades[fusionIndex];
+            selectedUpgrades.Add(guaranteedFusion);
+            validUpgrades.Remove(guaranteedFusion);
         }
 
         // Random chọn, ưu tiên luôn có ít nhất 1 Stat nếu có trong danh sách hợp lệ
         List<UpgradeData> statUpgrades = validUpgrades.FindAll(u => u.upgradeType == UpgradeData.UpgradeType.Stat);
-        if (count > 0 && statUpgrades.Count > 0)
+        if (selectedUpgrades.Count < count && statUpgrades.Count > 0)
         {
             int statIndex = Random.Range(0, statUpgrades.Count);
             UpgradeData guaranteedStat = statUpgrades[statIndex];

@@ -414,6 +414,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: AGU_Scripts::PlayerMovement2D
   moveSpeed: 5
+  invertFlip: 0
 --- !u!1 &8595314968871036631
 GameObject:
   m_ObjectHideFlags: 0
@@ -469,3 +470,9 @@ MonoBehaviour:
   enemyQueryBufferSize: 64
   projectilePrefab: {fileID: 7174401495918054263, guid: 217029eb9f5e3d642807772dc382893d, type: 3}
   firePoint: {fileID: 0}
+  isSpinning: 0
+  spinRadius: 1.5
+  spinAngularSpeed: 180
+  spinLifetime: 0
+  spinRadiusPerProjectile: 0.12
+  minSpinRadius: 1.5

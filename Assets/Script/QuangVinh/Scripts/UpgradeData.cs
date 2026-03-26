@@ -104,6 +104,18 @@ public class UpgradeData : ScriptableObject
         return Weapon.NormalizeWeaponId(fusionSourceWeaponB);
     }
 
+    public string GetFusionResultWeaponName()
+    {
+        string result = GetTargetWeaponName();
+        if (!string.IsNullOrEmpty(result)) return result;
+
+        GameObject prefab = GetWeaponPrefab();
+        if (prefab == null) return string.Empty;
+
+        Weapon weapon = prefab.GetComponent<Weapon>();
+        return weapon != null ? weapon.WeaponName : string.Empty;
+    }
+
     public bool CanApplyFusion(WeaponController weaponController)
     {
         if (weaponController == null) return false;
@@ -111,6 +123,7 @@ public class UpgradeData : ScriptableObject
         string sourceA = GetFusionSourceWeaponA();
         string sourceB = GetFusionSourceWeaponB();
         if (string.IsNullOrEmpty(sourceA) || string.IsNullOrEmpty(sourceB)) return false;
+        if (sourceA == sourceB) return false;
 
         bool hasA = weaponController.HasWeapon(sourceA);
         bool hasB = weaponController.HasWeapon(sourceB);

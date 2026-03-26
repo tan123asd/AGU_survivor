@@ -19,7 +19,7 @@ MonoBehaviour:
   buffEffects: []
   weaponData: {fileID: 11400000, guid: e756a371a87bf324ca09d9e1d2fbef6a, type: 2}
   weaponMode: 0
-  targetWeaponName: boom
+  targetWeaponName: bomb
   weaponPrefab: {fileID: 4892131679295754025, guid: 78958dedced014843a037e2e72edd5ff, type: 3}
   fusionSourceWeaponA: 
   fusionSourceWeaponB: 
