@@ -33,7 +33,7 @@ public class Enemy : MonoBehaviour, IDamageable
     protected float wanderTimer = 0f;
     protected float wanderInterval = 2f; // Thời gian đổi hướng
     protected float wanderRadius = 5f; // Phạm vi di chuyển tự do
-    
+
     // Scale gốc để giữ khi flip sprite
     protected Vector3 originalScale;
 
@@ -101,7 +101,7 @@ public class Enemy : MonoBehaviour, IDamageable
         Vector2 direction = (targetPos - transform.position).normalized;
         transform.localScale = direction.x < 0
             ? new Vector3(-Mathf.Abs(originalScale.x), originalScale.y, originalScale.z)
-            : new Vector3( Mathf.Abs(originalScale.x), originalScale.y, originalScale.z);
+            : new Vector3(Mathf.Abs(originalScale.x), originalScale.y, originalScale.z);
 
         if (health <= 0)
         {
@@ -115,7 +115,7 @@ public class Enemy : MonoBehaviour, IDamageable
 
     public virtual void TakeDamage(int damage)
     {
-        if(isDead) return;
+        if (isDead) return;
 
         // Implementation of TakeDamage method
         lastDamageTime = Time.time;

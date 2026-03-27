@@ -1,36 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &1099559838512133273
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1301770166281943900}
-  m_Layer: 0
-  m_Name: SpawnSpell
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1301770166281943900
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1099559838512133273}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.008, y: 0.35, z: 0}
-  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2656434883926256813}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7441429887425416535
 GameObject:
   m_ObjectHideFlags: 0
@@ -43,9 +12,9 @@ GameObject:
   - component: {fileID: 1495529030605374784}
   - component: {fileID: 358669174839197568}
   - component: {fileID: 8510071514475669896}
-  - component: {fileID: 1853430899898332846}
+  - component: {fileID: 6007548357376999737}
   m_Layer: 0
-  m_Name: BossEnemy
+  m_Name: BossProjectile
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -60,11 +29,10 @@ Transform:
   m_GameObject: {fileID: 7441429887425416535}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.787, y: -2.922, z: 0}
-  m_LocalScale: {x: 10, y: 10, z: 10}
+  m_LocalPosition: {x: -2.17, y: -2.9873, z: 0}
+  m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 1
-  m_Children:
-  - {fileID: 1301770166281943900}
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &1495529030605374784
@@ -116,7 +84,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 10
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -750047184722822154, guid: 1914d95466e3d4341a618c35a56d5f82, type: 3}
+  m_Sprite: {fileID: 29702762353113097, guid: 1914d95466e3d4341a618c35a56d5f82, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -136,7 +104,7 @@ Animator:
   m_GameObject: {fileID: 7441429887425416535}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: ccee253ff083e9e45ac8d4d553de6318, type: 2}
+  m_Controller: {fileID: 9100000, guid: d494d2e1ffdbd1d4e9091a8b4c54a27b, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -182,19 +150,19 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.00035750866, y: -0.022724032}
+  m_Offset: {x: -0.02339089, y: -0.14694715}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.44, y: 0.59}
+    oldSize: {x: 0.34, y: 0.58}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.4731753, y: 0.5922859}
+  m_Size: {x: 0.36855292, y: 0.61285734}
   m_EdgeRadius: 0
---- !u!114 &1853430899898332846
+--- !u!114 &6007548357376999737
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -203,22 +171,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 7441429887425416535}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cad690d140e48ea46980f496e5743c81, type: 3}
+  m_Script: {fileID: 11500000, guid: 779fb7cbc5a3cd24e9ab0919a0a673e4, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: AGU_Scripts::BossEnemy
-  speed: 2
-  health: 5
-  expPrefabNames: []
-  expSpawn: []
-  bossHealthMultiplier: 20
-  bossDamageMultiplier: 3
-  bossSpeedMultiplier: 1.5
-  attackRange: 5
-  castRange: 15
-  attackCooldown: 2
-  castCooldownMin: 5
-  castCooldownMax: 5
-  spellProjectilePrefab: {fileID: 7441429887425416535, guid: 9b69c175356754b4b838b2d0c309f9ed, type: 3}
-  spellSpawnPoint: {fileID: 1301770166281943900}
-  spellDamage: 30
-  spellSpeed: 5
+  m_EditorClassIdentifier: AGU_Scripts::SpellProjectile
+  speed: 5
+  damage: 30
+  lifetime: 10
