@@ -173,5 +173,7 @@ MonoBehaviour:
   damage: 1
   lifetime: 5
   zPosition: -0.5
+  persistentOnHit: 0
+  disableLifetime: 0
   burnDamagePerSecond: 1
   burnDuration: 5
