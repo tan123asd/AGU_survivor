@@ -4,18 +4,14 @@ using UnityEngine;
 public class SpawnObjects : MonoBehaviour
 {
     [Header("Prefabs")]
-    public GameObject[] chestPrefabs;
-    public GameObject[] destructiveObjectPrefabs;
+    public GameObject[] healthPotionPrefabs;
 
     [Header("Spawn Settings")]
     [Tooltip("Time between each spawn wave (seconds)")]
     public float spawnInterval = 15f;
 
-    [Tooltip("How many chests to spawn per wave")]
-    public int chestsPerWave = 1;
-
-    [Tooltip("How many destructive objects to spawn per wave")]
-    public int destructivesPerWave = 2;
+    [Tooltip("How many health potions to spawn per wave")]
+    public int healthPotionsPerWave = 1;
 
     [Tooltip("Min distance from player to spawn")]
     public float minSpawnDistance = 3f;
@@ -23,13 +19,11 @@ public class SpawnObjects : MonoBehaviour
     [Tooltip("Max distance from player to spawn")]
     public float maxSpawnDistance = 8f;
 
-    [Tooltip("Max objects alive at the same time")]
-    public int maxChests = 5;
-    public int maxDestructives = 10;
+    [Tooltip("Max health potions alive at the same time")]
+    public int maxHealthPotions = 3;
 
     private Transform playerTransform;
-    private int currentChestCount;
-    private int currentDestructiveCount;
+    private int currentHealthPotionCount;
 
     private bool TryResolvePlayerTransform()
     {
@@ -73,30 +67,17 @@ public class SpawnObjects : MonoBehaviour
 
             if (!TryResolvePlayerTransform()) continue;
 
-            // Spawn chests
-            for (int i = 0; i < chestsPerWave; i++)
+            // Spawn health potions
+            for (int i = 0; i < healthPotionsPerWave; i++)
             {
-                if (currentChestCount >= maxChests) break;
-                if (chestPrefabs.Length == 0) break;
+                if (currentHealthPotionCount >= maxHealthPotions) break;
+                if (healthPotionPrefabs.Length == 0) break;
 
-                int index = Random.Range(0, chestPrefabs.Length);
+                int index = Random.Range(0, healthPotionPrefabs.Length);
                 Vector2 pos = RandomPositionAroundPlayer();
-                GameObject obj = Instantiate(chestPrefabs[index], pos, Quaternion.identity);
-                currentChestCount++;
-                TrackDestruction(obj, true);
-            }
-
-            // Spawn destructive objects
-            for (int i = 0; i < destructivesPerWave; i++)
-            {
-                if (currentDestructiveCount >= maxDestructives) break;
-                if (destructiveObjectPrefabs.Length == 0) break;
-
-                int index = Random.Range(0, destructiveObjectPrefabs.Length);
-                Vector2 pos = RandomPositionAroundPlayer();
-                GameObject obj = Instantiate(destructiveObjectPrefabs[index], pos, Quaternion.identity);
-                currentDestructiveCount++;
-                TrackDestruction(obj, false);
+                GameObject obj = Instantiate(healthPotionPrefabs[index], pos, Quaternion.identity);
+                currentHealthPotionCount++;
+                TrackDestruction(obj);
             }
         }
     }
@@ -112,18 +93,14 @@ public class SpawnObjects : MonoBehaviour
         return playerPos + offset;
     }
 
-    private void TrackDestruction(GameObject obj, bool isChest)
+    private void TrackDestruction(GameObject obj)
     {
-        // Use a helper component to decrement count when object is destroyed
         var tracker = obj.AddComponent<SpawnedObjectTracker>();
-        tracker.Init(this, isChest);
+        tracker.Init(this);
     }
 
-    public void OnSpawnedObjectDestroyed(bool isChest)
+    public void OnSpawnedObjectDestroyed()
     {
-        if (isChest)
-            currentChestCount--;
-        else
-            currentDestructiveCount--;
+        currentHealthPotionCount--;
     }
 }
