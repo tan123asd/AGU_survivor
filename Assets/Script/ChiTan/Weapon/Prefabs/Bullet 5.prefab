@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4668238744608385649}
   - component: {fileID: 4739118862335670819}
   - component: {fileID: 1604039775971597238}
-  - component: {fileID: 5087837263525405875}
+  - component: {fileID: 8232173542452385313}
   m_Layer: 0
   m_Name: Bullet 5
   m_TagString: Untagged
@@ -84,7 +84,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -1327499133, guid: 0d5e657ee5a074e4baa53d5b248a01d2, type: 3}
+  m_Sprite: {fileID: 762804792, guid: 0d5e657ee5a074e4baa53d5b248a01d2, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -157,7 +157,7 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!114 &5087837263525405875
+--- !u!114 &8232173542452385313
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -166,14 +166,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 2176621843390485237}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3d4b5c79442818c4b973b3ceb1c8d7b8, type: 3}
+  m_Script: {fileID: 11500000, guid: 59eeaa6d162b3e343a66d3d3eb95dd59, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FireballProjectile
+  m_EditorClassIdentifier: AGU_Scripts::OrbitingWeapon
   speed: 10
-  damage: 1
-  lifetime: 5
+  damage: 10
+  lifetime: 10
   zPosition: -0.5
-  persistentOnHit: 1
-  disableLifetime: 1
-  burnDamagePerSecond: 1
-  burnDuration: 5
+  persistentOnHit: 0
+  disableLifetime: 0
+  target: {fileID: 0}
+  orbitRadius: 2
+  orbitSpeed: 180
+  orbitingWeaponPrefab: {fileID: 2176621843390485237, guid: 8ba00ccfffae11041b67cef8c84c3763, type: 3}
+  autoRespawn: 1

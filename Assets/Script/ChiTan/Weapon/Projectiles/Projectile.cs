@@ -88,9 +88,11 @@ public class Projectile : MonoBehaviour
                 // also be authority-gated to avoid client-side desync.
                 OnHitEnemy(other);
             }
-            
-            // Hủy viên đạn
-            Destroy(gameObject);
+            // Chỉ destroy nếu không phải vũ khí persistent
+            if (!persistentOnHit)
+            {
+                Destroy(gameObject);
+            }
         }
     }
 
