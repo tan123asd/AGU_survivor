@@ -13,7 +13,7 @@ public class PhotonLogin : MonoBehaviourPunCallbacks
 
     void Start()
     {
-        this.nickName = "Sai";
+        this.nickName = "";
         this.inputUsername.text = this.nickName;
 
         if (step2Login) step2Login.SetActive(true);
