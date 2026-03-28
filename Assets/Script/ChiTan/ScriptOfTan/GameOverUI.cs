@@ -50,10 +50,10 @@ public class GameOverUI : MonoBehaviour
 
     public void ReturnToRoom()
     {
-        if (PhotonNetwork.IsConnected)
+        if (PhotonNetwork.InRoom)
             PhotonNetwork.LeaveRoom();
         else
-            SceneManager.LoadScene("1_PhotonRoom");
+            SceneManager.LoadScene(1);
     }
 
     private void BuildUI()
