@@ -5,19 +5,23 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
-/// Game Over UI - Chỉ sửa trong script này thôi
-/// Người chết thấy UI, fix lỗi input + fix lỗi join phòng lại.
+/// Game Over UI - HIỆN TRÊN TẤT CẢ MÁY
+/// Chỉ sửa trong script này, không cần thay đổi PlayerController hay MapManager.
 /// </summary>
 public class GameOverUI : MonoBehaviourPunCallbacks
 {
     private GameObject gameOverPanel;
     private Button returnButton;
+    private PhotonView photonView;   // ← Dùng để RPC
 
     private void Start()
     {
         BuildUI();
 
-        // Giữ nguyên như cũ (không cần sửa PlayerController)
+        // Tạo PhotonView tự động để đồng bộ UI
+        photonView = gameObject.AddComponent<PhotonView>();
+
+        // Giữ nguyên listener cũ
         if (PlayerController.Instance != null)
             PlayerController.Instance.OnAllPlayersDied.AddListener(OnAllPlayersDied);
 
@@ -40,15 +44,26 @@ public class GameOverUI : MonoBehaviourPunCallbacks
             MapManager.Instance.GameOver();
     }
 
+    // ====================== HIỆN UI TRÊN TẤT CẢ MÁY ======================
     private void ShowGameOver()
     {
-        // BỎ DÒNG NÀY để tránh lỗi không tương tác sau khi load scene
-        // PlayerController.Instance.SetAllPlayersInputEnabled(false);
+        // Gọi RPC để mọi client đều thấy UI
+        if (photonView != null)
+            photonView.RPC("ShowGameOverRPC", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void ShowGameOverRPC()
+    {
+        // Disable input cho tất cả người chơi (global game over)
+        if (PlayerController.Instance != null)
+            PlayerController.Instance.SetAllPlayersInputEnabled(false);
 
         if (gameOverPanel != null)
             gameOverPanel.SetActive(true);
     }
 
+    // ====================== RETURN TO ROOM ======================
     public void ReturnToRoom()
     {
         if (returnButton != null)
@@ -60,12 +75,12 @@ public class GameOverUI : MonoBehaviourPunCallbacks
             SceneManager.LoadScene(1); // lobby của bạn
     }
 
-    // Callback này rất quan trọng để fix lỗi login khi join phòng lại
     public override void OnLeftRoom()
     {
         SceneManager.LoadScene(1);
     }
 
+    // ====================== BUILD UI ======================
     private void BuildUI()
     {
         // --- Canvas ---
@@ -89,11 +104,11 @@ public class GameOverUI : MonoBehaviourPunCallbacks
         panelRect.offsetMin = Vector2.zero;
         panelRect.offsetMax = Vector2.zero;
 
-        // --- YOU DIED text ---
+        // --- GAME OVER text ---
         GameObject textObj = new GameObject("GameOverText");
         textObj.transform.SetParent(gameOverPanel.transform, false);
         TextMeshProUGUI gameOverText = textObj.AddComponent<TextMeshProUGUI>();
-        gameOverText.text = "YOU DIED";
+        gameOverText.text = "GAME OVER";
         gameOverText.fontSize = 90;
         gameOverText.color = Color.red;
         gameOverText.alignment = TextAlignmentOptions.Center;
