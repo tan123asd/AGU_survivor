@@ -53,7 +53,7 @@ public class GameOverUI : MonoBehaviour
         if (PhotonNetwork.InRoom)
             PhotonNetwork.LeaveRoom();
         else
-            SceneManager.LoadScene(1);
+            SceneManager.LoadScene(2);
     }
 
     private void BuildUI()

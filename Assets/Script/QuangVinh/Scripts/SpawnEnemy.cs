@@ -7,25 +7,25 @@ public class SpawnEnemy : MonoBehaviour
     public GameObject[] enemyPrefabs;
     private int waveNumber = 5;
     public Camera mainCamera;
-    
+
     [Header("Boss Settings")]
     [SerializeField] private GameObject bossPrefab; // Prefab của boss
     [SerializeField] private MapConfig mapConfig; // Reference đến MapConfig
-    
+
     private Coroutine normalSpawnCoroutine;
     private Coroutine bossSpawnCoroutine;
     private bool isBossPhase = false;
-    
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         // ✅ CHỈ CHẠY KHI Ở PLAY MODE
         if (!Application.isPlaying) return;
-        
+
         // Tìm camera nếu chưa assign
         if (mainCamera == null)
             mainCamera = Camera.main;
-            
+
         // Bắt đầu spawn enemy thường
         SpawnWave(waveNumber);
         normalSpawnCoroutine = StartCoroutine(SpawnWaves());
@@ -42,18 +42,18 @@ public class SpawnEnemy : MonoBehaviour
         while (!isBossPhase) // Chỉ spawn khi chưa vào boss phase
         {
             yield return new WaitForSeconds(5f);
-            
+
             // Kiểm tra xem có đang ở boss phase không
             if (MapManager.Instance != null && MapManager.Instance.IsBossPhase)
             {
                 isBossPhase = true;
                 break;
             }
-            
+
             SpawnWave(waveNumber);
         }
     }
-    
+
     private void SpawnWave(int waveNumber)
     {
         for (int i = 0; i < waveNumber; i++)
@@ -70,23 +70,16 @@ public class SpawnEnemy : MonoBehaviour
     public void StartBossSpawn()
     {
         if (isBossPhase) return;
-        
+
         isBossPhase = true;
-        
-        // Dừng spawn enemy thường
-        if (normalSpawnCoroutine != null)
-        {
-            StopCoroutine(normalSpawnCoroutine);
-            normalSpawnCoroutine = null;
-        }
-        
+
         // Spawn boss đầu tiên
         int initialBossCount = mapConfig != null ? mapConfig.InitialBossCount : 1;
         for (int i = 0; i < initialBossCount; i++)
         {
             SpawnSingleBoss();
         }
-        
+
         Debug.Log($"Boss phase started! Spawned {initialBossCount} initial boss(es)");
     }
 
@@ -100,10 +93,10 @@ public class SpawnEnemy : MonoBehaviour
             Debug.LogError("Boss prefab is not assigned!");
             return;
         }
-        
+
         Vector2 spawnPos = RandomPosition();
         GameObject bossObj = Instantiate(bossPrefab, spawnPos, Quaternion.identity);
-        
+
         Debug.Log($"Spawned BOSS at position {spawnPos}");
     }
 
@@ -111,7 +104,7 @@ public class SpawnEnemy : MonoBehaviour
     {
         float cameraHeight = 2f * mainCamera.orthographicSize;
         float cameraWidth = cameraHeight * mainCamera.aspect;
-        
+
         // ✅ LẤY VỊ TRÍ CAMERA (sửa bug spawn ở (0,0))
         Vector2 cameraPos = mainCamera.transform.position;
 
