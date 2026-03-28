@@ -1,22 +1,23 @@
-using Photon.Pun;
+﻿using Photon.Pun;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
-/// Self-contained Game Over UI.
-/// Creates its own Canvas, panel, text, and button at runtime.
-/// Just add this component to any GameObject in the gameplay scene.
+/// Game Over UI - Chỉ sửa trong script này thôi
+/// Người chết thấy UI, fix lỗi input + fix lỗi join phòng lại.
 /// </summary>
-public class GameOverUI : MonoBehaviour
+public class GameOverUI : MonoBehaviourPunCallbacks
 {
     private GameObject gameOverPanel;
+    private Button returnButton;
 
     private void Start()
     {
         BuildUI();
 
+        // Giữ nguyên như cũ (không cần sửa PlayerController)
         if (PlayerController.Instance != null)
             PlayerController.Instance.OnAllPlayersDied.AddListener(OnAllPlayersDied);
 
@@ -41,8 +42,8 @@ public class GameOverUI : MonoBehaviour
 
     private void ShowGameOver()
     {
-        if (PlayerController.Instance != null)
-            PlayerController.Instance.SetAllPlayersInputEnabled(false);
+        // BỎ DÒNG NÀY để tránh lỗi không tương tác sau khi load scene
+        // PlayerController.Instance.SetAllPlayersInputEnabled(false);
 
         if (gameOverPanel != null)
             gameOverPanel.SetActive(true);
@@ -50,10 +51,19 @@ public class GameOverUI : MonoBehaviour
 
     public void ReturnToRoom()
     {
+        if (returnButton != null)
+            returnButton.interactable = false;
+
         if (PhotonNetwork.InRoom)
             PhotonNetwork.LeaveRoom();
         else
-            SceneManager.LoadScene(1);
+            SceneManager.LoadScene(1); // lobby của bạn
+    }
+
+    // Callback này rất quan trọng để fix lỗi login khi join phòng lại
+    public override void OnLeftRoom()
+    {
+        SceneManager.LoadScene(1);
     }
 
     private void BuildUI()
@@ -79,12 +89,12 @@ public class GameOverUI : MonoBehaviour
         panelRect.offsetMin = Vector2.zero;
         panelRect.offsetMax = Vector2.zero;
 
-        // --- "GAME OVER" text ---
+        // --- YOU DIED text ---
         GameObject textObj = new GameObject("GameOverText");
         textObj.transform.SetParent(gameOverPanel.transform, false);
         TextMeshProUGUI gameOverText = textObj.AddComponent<TextMeshProUGUI>();
-        gameOverText.text = "GAME OVER";
-        gameOverText.fontSize = 80;
+        gameOverText.text = "YOU DIED";
+        gameOverText.fontSize = 90;
         gameOverText.color = Color.red;
         gameOverText.alignment = TextAlignmentOptions.Center;
         gameOverText.fontStyle = FontStyles.Bold;
@@ -94,18 +104,21 @@ public class GameOverUI : MonoBehaviour
         textRect.sizeDelta = new Vector2(800, 120);
         textRect.anchoredPosition = Vector2.zero;
 
-        // --- "Return to Room" button ---
+        // --- Button ---
         GameObject buttonObj = new GameObject("ReturnButton");
         buttonObj.transform.SetParent(gameOverPanel.transform, false);
         Image buttonImage = buttonObj.AddComponent<Image>();
         buttonImage.color = new Color(0.2f, 0.6f, 1f, 1f);
-        Button button = buttonObj.AddComponent<Button>();
-        button.targetGraphic = buttonImage;
-        ColorBlock colors = button.colors;
+
+        returnButton = buttonObj.AddComponent<Button>();
+        returnButton.targetGraphic = buttonImage;
+
+        ColorBlock colors = returnButton.colors;
         colors.highlightedColor = new Color(0.3f, 0.7f, 1f, 1f);
         colors.pressedColor = new Color(0.1f, 0.4f, 0.8f, 1f);
-        button.colors = colors;
-        button.onClick.AddListener(ReturnToRoom);
+        returnButton.colors = colors;
+        returnButton.onClick.AddListener(ReturnToRoom);
+
         RectTransform buttonRect = buttonObj.GetComponent<RectTransform>();
         buttonRect.anchorMin = new Vector2(0.5f, 0.35f);
         buttonRect.anchorMax = new Vector2(0.5f, 0.35f);
